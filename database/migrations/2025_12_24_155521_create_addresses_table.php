@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('ward', 255)->nullable();
             $table->string('detail', 255);
 
+            $table->boolean('is_default')->default(false);
+
             $table->timestamps();
         });
     }

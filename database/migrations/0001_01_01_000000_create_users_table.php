@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('email', 255)->unique('idx_users_email');
             $table->string('password', 125);
 
+            $table->string('avatar', 255)->nullable();
             $table->date('birthday')->nullable();
             $table->tinyInteger('sex')->nullable();
             $table->tinyInteger('status')->default(1);
