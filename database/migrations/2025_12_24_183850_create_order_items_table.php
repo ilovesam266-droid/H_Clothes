@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('product_name', 255);
             $table->string('variant_name', 255);
 
-            $table->bigInteger('unit_price');
+            $table->unsignedbigInteger('unit_price');
             $table->unsignedInteger('quantity')->default(1);
 
             $table->timestamps();

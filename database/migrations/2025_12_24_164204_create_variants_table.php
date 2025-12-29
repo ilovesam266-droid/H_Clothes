@@ -18,11 +18,14 @@ return new class extends Migration
                 ->constrained('products')
                 ->cascadeOnDelete();
 
-            $table->tinyInteger('type');
-            $table->string('name', 50);
+            $table->string('size', 20);
+            $table->string('color', 30);
 
-            $table->unsignedBigInteger('stock');
-            $table->unsignedBigInteger('sold')->default(0);
+            $table->string('sku', 100)->nullable();
+
+            $table->bigInteger('price');
+            $table->unsignedInteger('stock');
+            $table->unsignedInteger('sold')->default(0);
 
             $table->timestamps();
             $table->softDeletes();
@@ -30,7 +33,6 @@ return new class extends Migration
             /* ================= INDEXES ================= */
 
             $table->index('deleted_at', 'idx_variants_deleted');
-            $table->index(['product_id', 'type'], 'idx_variants_product_type');
         });
     }
 

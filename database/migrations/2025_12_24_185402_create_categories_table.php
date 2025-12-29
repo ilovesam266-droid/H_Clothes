@@ -26,7 +26,6 @@ return new class extends Migration
 
             /* ================= INDEXES ================= */
 
-            $table->unique('name', 'idx_categories_name');
             $table->index('slug', 'idx_categories_slug');
             $table->index('deleted_at', 'idx_categories_deleted');
         });

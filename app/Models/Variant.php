@@ -12,14 +12,32 @@ class Variant extends Model
 
     protected $fillable = [
         'product_id',
-        'type',
-        'name',
+        'size',
+        'color',
+        'sku',
+        'price',
         'stock',
         'sold',
+    ];
+
+    protected $casts = [
+        'price' => 'integer',
+        'stock' => 'integer',
+        'sold'  => 'integer',
     ];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->size} - {$this->color}";
+    }
+
+    public function isOutOfStock(): bool
+    {
+        return $this->stock <= 0;
     }
 }

@@ -29,10 +29,10 @@ return new class extends Migration
 
             /* ================= INDEXES ================= */
 
-            $table->unique(
-                ['cart_id', 'variant_id'],
-                'idx_cart_items_cart_variant'
-            );
+            // $table->unique(
+            //     ['cart_id', 'variant_id'],
+            //     'idx_cart_items_cart_variant'
+            // );
         });
     }
 
