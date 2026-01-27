@@ -146,44 +146,44 @@ interface BaseRepositoryInterface
         ?callable $beforeDelete = null
     );
 
-    /**
-     * Calculate the sum of a column.
-     *
-     * @param  string|array  $columns
-     * @param  mixed|null    $criteria
-     *
-     * @return int|float
-     */
-    public function sum($columns, $criteria = null);
+    // /**
+    //  * Calculate the sum of a column.
+    //  *
+    //  * @param  string|array  $columns
+    //  * @param  mixed|null    $criteria
+    //  *
+    //  * @return int|float
+    //  */
+    // public function sum($columns, $criteria = null);
 
-    /**
-     * Count records.
-     *
-     * @param  string       $columns
-     * @param  mixed|null   $criteria
-     *
-     * @return int
-     */
-    public function count($columns = '*', $criteria = null);
+    // /**
+    //  * Count records.
+    //  *
+    //  * @param  string       $columns
+    //  * @param  mixed|null   $criteria
+    //  *
+    //  * @return int
+    //  */
+    // public function count($columns = '*', $criteria = null);
 
-    /**
-     * Calculate the average value of a column.
-     *
-     * @param  string|array  $columns
-     * @param  mixed|null    $criteria
-     *
-     * @return float|null
-     */
-    public function avg($columns, $criteria = null);
+    // /**
+    //  * Calculate the average value of a column.
+    //  *
+    //  * @param  string|array  $columns
+    //  * @param  mixed|null    $criteria
+    //  *
+    //  * @return float|null
+    //  */
+    // public function avg($columns, $criteria = null);
 
-    /**
-     * Determine if any record exists for the given criteria.
-     *
-     * @param  mixed  $criteria
-     *
-     * @return bool
-     */
-    public function exists($criteria);
+    // /**
+    //  * Determine if any record exists for the given criteria.
+    //  *
+    //  * @param  mixed  $criteria
+    //  *
+    //  * @return bool
+    //  */
+    // public function exists($criteria);
 
     /**
      * Get the underlying Eloquent model instance.

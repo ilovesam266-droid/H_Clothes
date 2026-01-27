@@ -60,7 +60,6 @@ abstract class BaseRepository implements BaseRepositoryInterface
         }
 
         return $query->get($columns);
-
     }
 
     public function create($attributes = [])
@@ -106,7 +105,8 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
         if(!in_array(SoftDeletes::class, class_uses($this->getModel()) ?: [])) {
             config('app.env') !== "production" && trigger_error("Warning: You are calling restore() on model [{$this->getModel()}] which does not use SoftDeletes.", E_USER_WARNING);
-        } else {
+        }
+        else {
             is_null($idOrCriteria) ? $query->onlyTrashed() : $query->withTrashed();
         }
 
@@ -122,6 +122,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     public function forceDelete($idOrCriteria = null, ?callable $beforeDelete = null)
     {
         $query = $this->model->query();
+
         if(!in_array(SoftDeletes::class, class_uses($this->getModel()) ?: [])) {
             config('app.env') !== "production" && trigger_error("Warning: You are calling forceDelete() on model [{$this->getModel()}] which does not use SoftDeletes.", E_USER_WARNING);
         }else {

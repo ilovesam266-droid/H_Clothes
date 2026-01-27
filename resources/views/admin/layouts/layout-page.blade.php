@@ -58,6 +58,7 @@
     <link rel="stylesheet" href="{{ asset('admin/vendor/css/pages/page-auth.css') }}" />
     <!-- Helpers -->
     <script src="{{ asset('admin/vendor/js/helpers.js') }}"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
@@ -88,6 +89,8 @@
 
     <script src="{{ asset('admin/vendor/js/menu.js') }}"></script>
     <!-- endbuild -->
+
+    @vite(['resources/js/app.js'])
 
     <!-- Vendors JS -->
 

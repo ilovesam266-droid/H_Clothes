@@ -3,6 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\UserRole;
+use App\Enums\UserSex;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -28,6 +32,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -46,6 +55,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'status' => UserStatus::class,
+            'role' => UserRole::class,
+            'sex' => UserSex::class,
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
