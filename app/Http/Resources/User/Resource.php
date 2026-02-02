@@ -40,6 +40,7 @@ class Resource extends JsonResource
             'status'     => $this->status ? [
                 'value' => $this->status->value,
                 'name' => $this->status->label(),
+                'color' => $this->status->badgeColor(),
             ] : null,
 
             'role'       => $this->role ? [

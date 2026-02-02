@@ -3,6 +3,7 @@ const UserPage = {
         users: [],
         userShow: null,
         deletedUsers: [],
+        idUserDelete: null,
         currentTab: 'active',
         userStatus: '',
         userRole: '',
@@ -118,11 +119,30 @@ const UserPage = {
             this.state.selectedUser.clear();
             this.updateBulkActionBar();
 
-
             this.fetchUsers();
         } catch (e) {
             alert('Bulk delete failed');
             console.error(e);
+        }
+    },
+
+    async confirmDelete() {
+        try {
+            const el = document.getElementById('confirmDeleteModal');
+            bootstrap.Modal.getOrCreateInstance(el)?.hide();
+
+            const res = await axios.delete(`/api/admin/users/${this.idUserDelete}/delete`);
+
+            if (res.status !== 200) {
+                throw new Error('Delete failed');
+            }
+
+            this.idUserDelete = null;
+            this.fetchUsers();
+
+        } catch (e) {
+            console.error(e);
+            alert('Delete failed');
         }
     },
 
@@ -159,6 +179,16 @@ const UserPage = {
 
         new bootstrap.Modal(
             document.getElementById('confirmBulkRestoreModal')
+        ).show();
+    },
+
+    openDeleteModal(id) {
+        if(!id) return;
+
+        this.idUserDelete = id;
+
+        new bootstrap.Modal(
+            document.getElementById('confirmDeleteModal')
         ).show();
     },
 
@@ -211,8 +241,8 @@ const UserPage = {
                         </span>
                     </td>
                     <td>
-                        <span class="badge bg-${user.status == 'Active' ? 'success' : 'danger'}">
-                            ${user.status}
+                        <span class="badge bg-${user.status.color}">
+                            ${user.status.name}
                         </span>
                     </td>
                     <td>
@@ -227,10 +257,10 @@ const UserPage = {
                         <button class="btn btn-info btn-action" onclick="userPageApp.openUserSidebar(${user.id})" title="View Details">
                                     <i class='bx bx-scan'></i>
                                 </button>
-                                <button class="btn btn-warning btn-action" onclick="userPageApp.editUser(${user.id})" title="Edit">
+                                <a href="${window.routes.userEdit}/${user.id}/edit" class="btn btn-warning btn-action">
                                     <i class="bx bx-edit"></i>
-                                </button>
-                                <button class="btn btn-danger btn-action" onclick="userPageApp.deleteUser(${user.id})" title="Delete">
+                                </a>
+                                <button class="btn btn-danger btn-action" onclick="userPageApp.openDeleteModal(${user.id})" title="Delete">
                                     <i class="bx bx-trash"></i>
                                 </button>
                             </td>
@@ -371,7 +401,7 @@ const UserPage = {
                                 <i class="bi bi-calendar-heart"></i>
                                 Birthday
                             </span>
-                            <span class="info-value">${user.birthday || 'N/A'}</span>
+                            <span class="info-value">${user.birthday.date || 'N/A'}</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">
@@ -379,10 +409,10 @@ const UserPage = {
                                 Gender
                             </span>
                             <span class="info-value">
-                                ${user.sex === 1
-                ? '<i class="bi bi-gender-male text-primary"></i> Male'
-                : user.sex === 2
-                    ? '<i class="bi bi-gender-female text-danger"></i> Female'
+                                ${user.sex.value === 0
+                ? '<i class="bx bx-male text-primary"></i> Male'
+                : user.sex.value === 1
+                    ? '<i class="bx bx-female text-danger"></i> Female'
                     : 'Other'}
                             </span>
                         </div>
@@ -396,8 +426,8 @@ const UserPage = {
                                 Role
                             </span>
                             <span class="info-value">
-                                <span class="badge ${user.role === 1 ? 'badge-role' : 'badge-role-user'}">
-                                    ${user.role === 1 ? 'Admin' : 'User'}
+                                <span class="badge bg-${user.role.color || 'secondary'}">
+                                    ${user.role.name}
                                 </span>
                             </span>
                         </div>
@@ -407,8 +437,8 @@ const UserPage = {
                                 Status
                             </span>
                             <span class="info-value">
-                                <span class="badge bg-${user.status === 1 ? 'success' : 'danger'}">
-                                    ${user.status === 1 ? 'Active' : 'Inactive'}
+                                <span class="badge bg-${user.status.color || 'danger'}">
+                                    ${user.status.name}
                                 </span>
                             </span>
                         </div>
@@ -417,7 +447,7 @@ const UserPage = {
                                 <i class="bi bi-clock-history"></i>
                                 Created At
                             </span>
-                            <span class="info-value">${user.created_at}</span>
+                            <span class="info-value">${user.created_at.date}</span>
                         </div>
                         ${user.deleted_at ? `
                             <div class="info-row">
@@ -509,5 +539,6 @@ const UserPage = {
 };
 
 window.userPageApp = UserPage;
+
 
 document.addEventListener('DOMContentLoaded', () => UserPage.init());

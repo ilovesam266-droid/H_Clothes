@@ -13,4 +13,12 @@ enum UserSex:int
             self::MALE => 'Male',
         };
     }
+
+    public function badgeColor(): string
+    {
+        return match ($this) {
+            self::FEMALE => "success",
+            self::MALE => "danger",
+        };
+    }
 }

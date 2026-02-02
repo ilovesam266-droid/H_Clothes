@@ -13,4 +13,12 @@ enum UserStatus : int
             self::ACTIVE => 'Active',
         };
     }
+
+    public function badgeColor(): string
+    {
+        return match ($this) {
+            self::ACTIVE => "success",
+            self::INACTIVE => "danger",
+        };
+    }
 }

@@ -61,6 +61,9 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     public function deleteUser($idOrCriteria)
     {
+        if (!is_array($idOrCriteria))
+            { $idOrCriteria = [$idOrCriteria]; }
+
         $criteria = ['whereIn' => Repository::wrapVlue('id', $idOrCriteria)];
 
         return $this->delete($criteria);

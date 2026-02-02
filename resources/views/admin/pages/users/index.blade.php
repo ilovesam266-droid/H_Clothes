@@ -75,11 +75,12 @@
                         </span>
                     </div>
                     <div>
-                        <button class="btn btn-danger btn-bulk" onclick="userPageApp.openBulkDeleteModal()" id="bulkDeleteBtn">
+                        <button class="btn btn-danger btn-bulk" onclick="userPageApp.openBulkDeleteModal()"
+                            id="bulkDeleteBtn">
                             <i class="bi bi-trash"></i> Delete Selected
                         </button>
-                        <button class="btn btn-success btn-bulk" onclick="userPageApp.openBulkRestoreModal()" id="bulkRestoreBtn"
-                            style="display:none;">
+                        <button class="btn btn-success btn-bulk" onclick="userPageApp.openBulkRestoreModal()"
+                            id="bulkRestoreBtn" style="display:none;">
                             <i class="bi bi-arrow-counterclockwise"></i> Restore Selected
                         </button>
                         <button class="btn btn-secondary btn-bulk" onclick="userPageApp.clearSelection()">
@@ -164,7 +165,7 @@
 
                 <div class="modal-body">
                     <p>
-                        Are you sure you want to delete
+                        Are you sure you want to restore
                         <strong id="bulkRestoreCount"></strong> users?
                     </p>
                     <p class="text-muted mb-0">
@@ -178,6 +179,40 @@
                     </button>
                     <button class="btn btn-success" onclick="userPageApp.confirmBulkRestore()">
                         Restore
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirmDeleteModal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Confirm Delete
+                    </h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        Are you sure you want to delete
+                        <strong id="bulkRestoreCount"></strong> users?
+                    </p>
+                    <p class="text-muted mb-0">
+                        This action can be deleted later.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-light" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success" onclick="userPageApp.confirmDelete()">
+                        Delete
                     </button>
                 </div>
 
@@ -199,4 +234,9 @@
             <!-- Actions will be loaded here -->
         </div>
     </div>
+    <script>
+        window.routes = {
+            userEdit: "{{ url('/admin/users') }}"
+        };
+    </script>
 @endsection

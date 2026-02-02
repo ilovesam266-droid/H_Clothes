@@ -8,41 +8,54 @@ use Illuminate\Support\Facades\Request;
 class UserService
 {
     protected $userRepo;
-    public function __construct(UserRepositoryInterface $user){
+    public function __construct(UserRepositoryInterface $user)
+    {
         $this->userRepo = $user;
     }
 
-    public function getAllUser($request){
+    public function getAllUser($request)
+    {
         $users = $this->userRepo->getAll($request);
 
         return $users;
     }
 
-    public function getUserById($id){
+    public function getUserById($id)
+    {
         $user = $this->userRepo->getUserById($id);
 
         return $user;
     }
 
-    public function storeUser($request, $avatarPath){
-        $request['avatar'] = "storage/".$avatarPath;
+    public function storeUser($request, $avatarPath)
+    {
+        if ($avatarPath) {
+            $request['avatar'] = "storage/" . $avatarPath;
+        }
+
         $user = $this->userRepo->create($request);
 
         return $user;
     }
 
-    public function updateUser($id, $request, $avatarPath){
-        $request['avatar'] = "storage/".$avatarPath;
+    public function updateUser($id, $request, $avatarPath)
+    {
+        if ($avatarPath) {
+            $request['avatar'] = "storage/" . $avatarPath;
+        }
+
         $user = $this->userRepo->update($id, $request);
 
         return $user;
     }
 
-    public function deleteUser($idOrCriteria){
+    public function deleteUser($idOrCriteria)
+    {
         return  $this->userRepo->deleteUser($idOrCriteria);
     }
 
-    public function restoreUser($idOrCriteria){
+    public function restoreUser($idOrCriteria)
+    {
         return $this->userRepo->restoreUser($idOrCriteria);
     }
 }

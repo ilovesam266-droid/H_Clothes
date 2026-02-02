@@ -51,14 +51,18 @@ class UserController extends Controller
      */
     public function update(int $id, UserRequest $request, UserService $userService)
     {
-        $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        $avatarPath = null;
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
         $user = $userService->updateUser($id, $request->all(), $avatarPath);
 
         return new Resource($user);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the a group resource from storage.
      */
     public function destroy(Request $request, UserService $userService)
     {
@@ -69,6 +73,15 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Deleted succesfully',
             'deleted_count' => $users,
+        ]);
+    }
+
+    public function delete(int $id, Request $request, UserService $userService)
+    {
+        $user = $userService->deleteUser($id);
+        return response()->json([
+            'message' => 'Deleted succesfully',
+            'data' => $user,
         ]);
     }
 

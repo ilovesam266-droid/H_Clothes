@@ -18,8 +18,8 @@ enum UserRole: int
     public function badgeColor(): string
     {
         return match ($this) {
-            self::ADMIN => "primary", // xanh dương
-            self::USER => "secondary", // xám };
+            self::ADMIN => "primary",
+            self::USER => "secondary",
         };
     }
 }
