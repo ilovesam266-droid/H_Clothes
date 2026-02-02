@@ -1,6 +1,54 @@
-const UserCreate = {
+const editUserApp = {
+    state: {
+        userId: null,
+        user: null,
+    },
     init() {
-        this.triggerAvatarUpload();
+        const el = document.getElementById('user-edit-page');
+        if (!el) return;
+
+        this.userId = el.dataset.userId;
+        this.cacheDom();
+        this.fetchUser();
+    },
+
+    cacheDom() {
+        this.form = document.getElementById('editUserForm');
+        this.avatarImg = document.getElementById('currentAvatar');
+        this.avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        this.avatarActions = document.getElementById('avatarActions');
+    },
+
+    async fetchUser() {
+        const res = await fetch(`/api/admin/users/${this.userId}`);
+        this.state.user = await res.json();
+
+        this.fillForm(this.state.user.data);
+    },
+
+    fillForm(user) {
+        console.log('API response user ', user);
+        document.getElementById('first_name').value = user.first_name ?? '';
+        document.getElementById('last_name').value = user.last_name ?? '';
+        document.getElementById('username').value = user.user_name ?? '';
+        document.getElementById('email').value = user.email ?? '';
+        document.getElementById('birthday').value = user.birthday.date ?? '';
+
+        document.querySelector(`input[name="sex"][value="${user.sex.value}"]`)?.click();
+        document.getElementById('role').value = user.role.value;
+        document.getElementById('status').value = user.status.value;
+
+        document.getElementById('emailVerified').checked = !!user.email_verified_at;
+
+        if (user.avatar) {
+            this.avatarImg.src = "/" + user.avatar;
+            this.avatarImg.classList.remove('hidden');
+            this.avatarPlaceholder.classList.add('hidden');
+            this.avatarActions.classList.remove('hidden');
+        }
+
+        document.getElementById('createdAt').innerText = user.created_at.date;
+        document.getElementById('updatedAt').innerText = user.updated_at.date;
     },
 
     previewAvatar(event) {
@@ -66,35 +114,31 @@ const UserCreate = {
         }
     },
 
+    async handleSubmit(e) {
+        e.preventDefault();
 
-    async handleSubmit(event) {
-        event.preventDefault();
-        // event.stopPropagation();
+        this.form.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+        this.form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
 
-        const form = document.getElementById('createUserForm');
-        const formData = new FormData(form);
+        const formData = new FormData(this.form);
 
         try {
-            // Clear old errors
-            document.querySelectorAll('.is-invalid').forEach(el => {
-                el.classList.remove('is-invalid');
-            });
-            document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-
-            const res = await fetch('/api/admin/users/create', {
+            const res = await fetch(`/api/admin/users/${this.userId}/edit`, {
                 method: 'POST',
-                body: formData,
                 headers: {
                     'Accept': 'application/json',
-                }
+                },
+                body: formData
             });
 
             const data = await res.json();
 
-            // Validation error (Laravel 422)
+            // Validation error
             if (res.status === 422 && data.errors) {
                 Object.entries(data.errors).forEach(([field, messages]) => {
-                    const input = document.querySelector(`[name="${field}"]`);
+                    const input = this.form.querySelector(`[name="${field}"]`);
                     if (!input) return;
 
                     input.classList.add('is-invalid');
@@ -109,22 +153,16 @@ const UserCreate = {
             }
 
             if (!res.ok) {
-                throw new Error(data.message || 'Request failed');
+                throw new Error(data.message || 'Update failed');
             }
 
-            // Success
             console.log('SUCCESS', data);
-            // toast / redirect / reset form
-
         } catch (err) {
             console.error('ERROR', err);
         }
 
-
-        return false;
     }
 };
 
-window.createUserApp = UserCreate;
-
-document.addEventListener('DOMContentLoaded', () => UserCreate.init());
+window.editUserApp = editUserApp;
+document.addEventListener('DOMContentLoaded', () => editUserApp.init());

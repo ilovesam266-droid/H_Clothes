@@ -15,4 +15,8 @@ class UserController extends Controller
         return view('admin.pages.users.create');
     }
 
+    public function edit($id) {
+        return view('admin.pages.users.edit', ['id' => $id]);
+    }
+
 }

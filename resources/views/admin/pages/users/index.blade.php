@@ -4,24 +4,22 @@
 
 @section('content')
     <div class="container-fluid" id="admin-user-page">
-
-
         <div class="d-flex justify-content-between mb-2">
             <div class="tabs-section">
                 <ul class="nav nav-tabs nav-tabs-custom">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="app.switchTab('active')">
+                        <a class="nav-link active" href="#" onclick="userPageApp.switchTab('active')">
                             Active Users <span class="badge-count" id="activeCount">0</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="app.switchTab('only')">
+                        <a class="nav-link" href="#" onclick="userPageApp.switchTab('only')">
                             <i class="bi bi-trash"></i> Deleted Users <span class="badge-count" id="deletedCount">0</span>
                         </a>
                     </li>
                 </ul>
             </div>
-            <button class="btn btn-add-user text-white" onclick="app.addUser()">
+            <button class="btn btn-add-user text-white" onclick="userPageApp.addUser()">
                 <i class="bx bx-plus-circle"></i> Add New User
             </button>
         </div>
@@ -77,14 +75,14 @@
                         </span>
                     </div>
                     <div>
-                        <button class="btn btn-danger btn-bulk" onclick="app.openBulkDeleteModal()" id="bulkDeleteBtn">
+                        <button class="btn btn-danger btn-bulk" onclick="userPageApp.openBulkDeleteModal()" id="bulkDeleteBtn">
                             <i class="bi bi-trash"></i> Delete Selected
                         </button>
-                        <button class="btn btn-success btn-bulk" onclick="app.openBulkRestoreModal()" id="bulkRestoreBtn"
+                        <button class="btn btn-success btn-bulk" onclick="userPageApp.openBulkRestoreModal()" id="bulkRestoreBtn"
                             style="display:none;">
                             <i class="bi bi-arrow-counterclockwise"></i> Restore Selected
                         </button>
-                        <button class="btn btn-secondary btn-bulk" onclick="app.clearSelection()">
+                        <button class="btn btn-secondary btn-bulk" onclick="userPageApp.clearSelection()">
                             <i class="bi bi-x-circle"></i> Clear Selection
                         </button>
                     </div>
@@ -95,7 +93,7 @@
                         <tr>
                             <th width="50">
                                 <input type="checkbox" class="checkbox-custom" id="selectAll"
-                                    onchange="app.toggleSelectAll()">
+                                    onchange="userPageApp.toggleSelectAll()">
                             </th>
                             <th>#</th>
                             <th>User</th>
@@ -144,7 +142,7 @@
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-danger" onclick="app.confirmBulkDelete()">
+                    <button class="btn btn-danger" onclick="userPageApp.confirmBulkDelete()">
                         Delete
                     </button>
                 </div>
@@ -178,7 +176,7 @@
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-success" onclick="app.confirmBulkRestore()">
+                    <button class="btn btn-success" onclick="userPageApp.confirmBulkRestore()">
                         Restore
                     </button>
                 </div>
@@ -186,11 +184,11 @@
             </div>
         </div>
     </div>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="app.closeSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="userPageApp.closeSidebar()"></div>
     <div class="user-sidebar" id="userSidebar">
         <div class="sidebar-header">
             <h3 class="text-white"><i class="bx bx-user-circle"></i> User Details</h3>
-            <button class="btn-close-sidebar" onclick="app.closeSidebar()">
+            <button class="btn-close-sidebar" onclick="userPageApp.closeSidebar()">
                 <i class="bx bx-menu"></i>
             </button>
         </div>

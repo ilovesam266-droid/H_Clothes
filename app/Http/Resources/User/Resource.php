@@ -27,12 +27,23 @@ class Resource extends JsonResource
 
             // profile
             'avatar'     => $this->avatar,
-            'birthday'   => optional($this->birthday)->format('Y-m-d'),
-            'sex'        => $this->sex,
+            'birthday'   =>  $this->created_at? [
+                'date' => $this->created_at->format('Y-m-d'),
+            ] : null,
+
+            'sex'        => $this->sex ? [
+                'value' => $this->sex->value,
+                'name' => $this->sex->label(),
+            ] : null,
 
             // system
-            'status'     => $this->status->label(),
+            'status'     => $this->status ? [
+                'value' => $this->status->value,
+                'name' => $this->status->label(),
+            ] : null,
+
             'role'       => $this->role ? [
+                'value' => $this->role->value,
                 'name' => $this->role->label(),
                 'color' => $this->role->badgeColor(),
             ] : null,

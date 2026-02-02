@@ -10,12 +10,11 @@
             <p>Fill in the information below to create a new user account</p>
         </div>
 
-        <form id="createUserForm" onsubmit="app.handleSubmit(event)" method="POST">
-            @csrf
+        <form id="createUserForm" method="POST" onsubmit="createUserApp.handleSubmit(event)">
             <!-- Avatar Upload -->
             <div class="avatar-upload">
-                <div class="avatar-preview" id="avatarPreview" onclick="app.triggerAvatarUpload()">
-                    <i class="bi bi-person-circle placeholder"></i>
+                <div class="avatar-preview" id="avatarPreview" onclick="createUserApp.triggerAvatarUpload()">
+                    <img src="\storage\avatars\uNF1lAILgTSp4zFB3zfQvEq7v769240pbHcwVwXR.jpg" alt="">
                     <div class="overlay">
                         <div class="overlay-text">
                             <i class="bi bi-cloud-upload" style="font-size: 24px; display: block; margin-bottom: 5px;"></i>
@@ -24,16 +23,16 @@
                     </div>
                 </div>
                 <input type="file" class="avatar-upload-input  @error('avatarInput') is-invalid @enderror"
-                    id="avatarInput" accept="image/*" onchange="app.previewAvatar(event)">
+                    id="avatarInput" accept="image/*" onchange="createUserApp.previewAvatar(event)">
                 @error('avatar')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
 
                 <div class="avatar-actions hidden" id="avatarActions">
-                    <button type="button" class="btn btn-warning btn-sm" onclick="app.changeAvatar()">
+                    <button type="button" class="btn btn-warning btn-sm" onclick="createUserApp.changeAvatar()">
                         <i class="bi bi-arrow-repeat"></i> Change
                     </button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="app.removeAvatar()">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="createUserApp.removeAvatar()">
                         <i class="bi bi-trash"></i> Remove
                     </button>
                 </div>
@@ -76,8 +75,7 @@
                     <label class="form-label">
                         Username <span class="required">*</span>
                     </label>
-                    <input type="text" class="form-control" id="username" name="user_name"
-                        >
+                    <input type="text" class="form-control" id="username" name="user_name">
                     <div class="hint-text">Only letters, numbers, and underscores</div>
                     <div class="invalid-feedback">Username already exists or invalid</div>
                     <div class="valid-feedback">Username available!</div>
@@ -86,8 +84,7 @@
                     <label class="form-label">
                         Email <span class="required">*</span>
                     </label>
-                    <input type="email" class="form-control" id="email" name="email"
-                        >
+                    <input type="email" class="form-control" id="email" name="email">
                     <div class="invalid-feedback">Email already exists or invalid</div>
                     <div class="valid-feedback">Email available!</div>
                 </div>
@@ -130,9 +127,8 @@
                         Password <span class="required">*</span>
                     </label>
                     <div class="password-wrapper">
-                        <input type="password" class="form-control" id="password" name="password"
-                            >
-                        <i class="bi bi-eye password-toggle" onclick="app.togglePassword('password')"></i>
+                        <input type="password" class="form-control" id="password" name="password">
+                        <i class="bi bi-eye password-toggle" onclick="createUserApp.togglePassword('password')"></i>
                     </div>
                     <div class="password-strength" id="passwordStrength"></div>
                     <div class="password-strength-text" id="passwordStrengthText"></div>
@@ -143,9 +139,9 @@
                         Confirm Password <span class="required">*</span>
                     </label>
                     <div class="password-wrapper">
-                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password"
-                            >
-                        <i class="bi bi-eye password-toggle" onclick="app.togglePassword('confirmPassword')"></i>
+                        <input type="password" class="form-control" id="confirmPassword" name="password_confirmation">
+                        <i class="bi bi-eye password-toggle"
+                            onclick="createUserApp.togglePassword('confirmPassword')"></i>
                     </div>
                     <div class="invalid-feedback">Passwords do not match</div>
                     <div class="valid-feedback">Passwords match!</div>
@@ -174,19 +170,9 @@
                 </div>
             </div>
 
-            <div class="mb-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="emailVerified" name="email_verified">
-                    <label class="form-check-label" for="emailVerified">
-                        <i class="bi bi-patch-check text-success"></i>
-                        Mark email as verified
-                    </label>
-                </div>
-            </div>
-
             <!-- Form Actions -->
             <div class="form-actions">
-                <button type="button" class="btn btn-cancel" onclick="app.cancel()">
+                <button type="button" class="btn btn-cancel" onclick="createUserApp.cancel()">
                     <i class="bi bi-x-circle"></i> Cancel
                 </button>
                 <button type="submit" class="btn btn-submit">

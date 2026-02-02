@@ -24,8 +24,16 @@ class UserService
         return $user;
     }
 
-    public function storeUser($request){
+    public function storeUser($request, $avatarPath){
+        $request['avatar'] = "storage/".$avatarPath;
         $user = $this->userRepo->create($request);
+
+        return $user;
+    }
+
+    public function updateUser($id, $request, $avatarPath){
+        $request['avatar'] = "storage/".$avatarPath;
+        $user = $this->userRepo->update($id, $request);
 
         return $user;
     }

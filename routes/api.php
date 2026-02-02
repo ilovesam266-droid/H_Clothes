@@ -9,4 +9,5 @@ Route::prefix('/admin')->name('admin.')->group(function () {
     Route::patch('/users/restore', [UserController::class,'restore'])->name('user-restore');
     Route::get('/users/{id}', [UserController::class,'show'])->name('user-show');
     Route::post('/users/create', [UserController::class,'store'])->name('user-create');
+    Route::post('/users/{id}/edit', [UserController::class,'update'])->name('user-edit'); // PHP can't parse
 });

@@ -26,24 +26,28 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'first_name' => 'required|string|max:125|regex:/^[\p{L}\s]+$/u',
+        $userId = $this->route('id');
+        $userRules = ['first_name' => 'required|string|max:125|regex:/^[\p{L}\s]+$/u',
             'last_name' => 'required|string|max:255|regex:/^[\p{L}\s]+$/u',
-            'user_name' => 'required|string|max:125|regex:/^[a-zA-Z0-9_]+$/|unique:users,user_name',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
-            ],
+            'user_name' => [ 'required', 'string', 'max:125', 'regex:/^[a-zA-Z0-9_]+$/', Rule::unique('users', 'user_name')->ignore($userId)],
+            'email' => [ 'required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'birthday' => 'nullable|date|before:today|after:1900-01-01',
             'sex' => 'required|integer|' . Rule::in(array_column(UserSex::cases(), 'value')),
             'role' => 'required|integer|' . Rule::in(array_column(UserRole::cases(), 'value')),
             'status' => 'required|integer|' . Rule::in(array_column(UserStatus::cases(), 'value')),
             'email_verified' => 'nullable|boolean',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048|dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000',
-        ];
+            ];
+
+        if(!$userId) {
+            $userRules['password'] = [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
+            ];
+        }
+        return $userRules;
     }
 
     public function messages(): array

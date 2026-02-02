@@ -189,7 +189,7 @@ const UserPage = {
                                 <input type="checkbox" class="checkbox-custom user-checkbox"
                                     data-user-id="${user.id}"
                                     ${isSelected ? 'checked' : ''}
-                                    onchange="app.toggleSelectUser(${user.id})">
+                                    onchange="userPageApp.toggleSelectUser(${user.id})">
                             </td>
                     <td>${index + 1}</td>
                     <td>
@@ -224,13 +224,13 @@ const UserPage = {
                         <small class="text-muted d-block">${user.updated_at.time}</small>
                     </td>
                     <td class="text-nowrap text-center">
-                        <button class="btn btn-info btn-action" onclick="app.openUserSidebar(${user.id})" title="View Details">
+                        <button class="btn btn-info btn-action" onclick="userPageApp.openUserSidebar(${user.id})" title="View Details">
                                     <i class='bx bx-scan'></i>
                                 </button>
-                                <button class="btn btn-warning btn-action" onclick="app.editUser(${user.id})" title="Edit">
+                                <button class="btn btn-warning btn-action" onclick="userPageApp.editUser(${user.id})" title="Edit">
                                     <i class="bx bx-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-action" onclick="app.deleteUser(${user.id})" title="Delete">
+                                <button class="btn btn-danger btn-action" onclick="userPageApp.deleteUser(${user.id})" title="Delete">
                                     <i class="bx bx-trash"></i>
                                 </button>
                             </td>
@@ -508,6 +508,6 @@ const UserPage = {
     }
 };
 
-window.app = UserPage;
+window.userPageApp = UserPage;
 
 document.addEventListener('DOMContentLoaded', () => UserPage.init());

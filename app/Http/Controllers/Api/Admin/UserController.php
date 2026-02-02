@@ -26,7 +26,12 @@ class UserController extends Controller
      */
     public function store(UserRequest $request, UserService $userService)
     {
-        $user = $userService->storeUser($request->all());
+        $avatarPath = null;
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
+        $user = $userService->storeUser($request->all(), $avatarPath);
 
         return new Resource($user);
     }
@@ -44,9 +49,12 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(int $id, UserRequest $request, UserService $userService)
     {
-        //
+        $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        $user = $userService->updateUser($id, $request->all(), $avatarPath);
+
+        return new Resource($user);
     }
 
     /**

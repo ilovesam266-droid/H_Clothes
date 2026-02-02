@@ -74,7 +74,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
         if(is_int($idOrCriteria) || is_string($idOrCriteria)) {
             $updatedModel = $query->find($idOrCriteria);
 
-            return $updatedModel?->update($data);
+            $updatedModel?->update($data);
+
+            return $updatedModel;
         }
     }
 
