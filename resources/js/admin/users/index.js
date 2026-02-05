@@ -159,7 +159,6 @@ const UserPage = {
         }
     },
 
-
     openBulkDeleteModal() {
         if (this.state.selectedUser.size === 0) return;
 
@@ -271,6 +270,7 @@ const UserPage = {
         this.updateBulkActionBar();
     },
 
+    //Component: Select checkbox
     toggleSelectAll() {
         const selectAllCheckbox = document.getElementById('selectAll');
         const currentData = this.state.users;
@@ -335,6 +335,7 @@ const UserPage = {
         this.updateSelectAllCheckbox();
     },
 
+    //Component: Switch tab
     switchTab(tab) {
         this.state.currentTab = tab;
         this.state.selectedUser.clear();
@@ -353,6 +354,7 @@ const UserPage = {
         this.renderPagination();
     },
 
+    // Component: Sidebar
     openSidebar(user) {
         const sidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
