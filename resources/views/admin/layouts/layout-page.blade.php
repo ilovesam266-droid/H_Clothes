@@ -86,6 +86,7 @@
     <script src="{{ asset('admin/vendor/libs/popper/popper.js') }}"></script>
     <script src="{{ asset('admin/vendor/js/bootstrap.js') }}"></script>
     <script src="{{ asset('admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script src="{{ asset('admin/vendor/js/menu.js') }}"></script>
     <!-- endbuild -->

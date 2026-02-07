@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -16,4 +17,6 @@ Route::prefix('/admin')->name('api.admin.')->group(function () {
     Route::get('/products', [ProductController::class, 'index'])->name('products');
     Route::post('/products', [ProductController::class,'destroy'])->name('products-delete');
     Route::patch('/products/restore', [ProductController::class,'restore'])->name('products-restore');
+
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
 });

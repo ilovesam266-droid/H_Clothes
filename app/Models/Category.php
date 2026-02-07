@@ -20,4 +20,9 @@ class Category extends Model
     {
         return $this->morphedByMany(Product::class, 'categoryable');
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

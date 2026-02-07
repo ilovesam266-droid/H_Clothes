@@ -21,6 +21,10 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
                     $q->select('id', 'product_id', 'stock', 'price', 'sku');
                 });
 
+                $query->with('creator', function ($q) {
+                    $q->select('id', 'first_name', 'last_name', 'email');
+                });
+
                 $query->when(
                     $request->trashed ?? null,
                     function ($q, $trashed) {

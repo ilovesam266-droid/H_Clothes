@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -20,5 +21,8 @@ Route::prefix('/admin')->name('admin.')->group(function(){
     Route::get('/users', [AdminUserController::class,'index'])->name('users');
     Route::get('/users/create', [AdminUserController::class,'create'])->name('user-create');
     Route::get('/users/{id}/edit', [AdminUserController::class,'edit'])->name('user-edit');
+
     Route::get('/products', [ProductController::class,'index'])->name('products');
+
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
 });

@@ -1,62 +1,48 @@
 @extends('admin.layouts.layout-page')
 
-@vite(['resources/js/admin/users/index.js', 'resources/css/admin/users.css'])
+@vite(['resources/js/admin/categories/index.js', 'resources/css/admin/categories.css'])
 
 @section('content')
-    <div class="container-fluid" id="admin-user-page">
+    <div class="container-fluid" id="admin-category-page">
         <div class="d-flex justify-content-between mb-2">
             <div class="tabs-section">
                 <ul class="nav nav-tabs nav-tabs-custom">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="userPageApp.switchTab('active', this)">
-                            Active Users <span class="badge-count" id="activeCount">0</span>
+                        <a class="nav-link active" href="#" onclick="categoryPageApp.switchTab('active')">
+                            Active Categories <span class="badge-count" id="activeCount">0</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="userPageApp.switchTab('only', this)">
-                            <i class="bi bi-trash"></i> Deleted Users <span class="badge-count" id="deletedCount">0</span>
+                        <a class="nav-link" href="#" onclick="categoryPageApp.switchTab('only')">
+                            <i class="bi bi-trash"></i> Deleted Categories <span class="badge-count" id="deletedCount">0</span>
                         </a>
                     </li>
                 </ul>
             </div>
-            <a class="btn btn-add-user text-white" href="{{ route('admin.user-create') }}">
-                <i class="bx bx-plus-circle"></i> Add New User
-            </a>
+            <button class="btn btn-add-category text-white" onclick="categoryPageApp.addCategory()">
+                <i class="bx bx-plus-circle"></i> Add New Category
+            </button>
         </div>
 
         <div class="card">
             <div class="card-body flex gap-2">
                 <div class="search-box">
                     <i class="bx bx-search"></i>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, email...">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, slug...">
                 </div>
             </div>
-            <div class="card-body flex gap-2" style="
-    padding-top: 0px;
-">
+            <div class="card-body flex gap-2" style="padding-top: 0px;">
                 <div class="row g-4">
-                    <div class="col-md-3">
-                        <select class="form-select" id="statusFilter">
-                            <option value="">All Status</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
+                    <div class="col-md-4">
+                        <select class="form-select" id="createdByFilter">
+                            <option value="">All Creators</option>
+                            <!-- Populate dynamically with users -->
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="roleFilter">
-                            <option value="">All Roles</option>
-                            <option value="0">Admin</option>
-                            <option value="1">User</option>
-                        </select>
+                    <div class="col-md-4">
+                        <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
                     </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="verifiedFilter">
-                            <option value="">All</option>
-                            <option value="1">Verified</option>
-                            <option value="0">Not Verified</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <select class="form-select" id="perPage">
                             <option value="10">10 / page</option>
                             <option value="25">25 / page</option>
@@ -71,42 +57,41 @@
                     <div>
                         <span class="selected-count">
                             <i class="bi bi-check-circle-fill"></i>
-                            <span id="selectedCount">0</span> Users selected
+                            <span id="selectedCount">0</span> Categories selected
                         </span>
                     </div>
                     <div>
-                        <button class="btn btn-danger btn-bulk" onclick="userPageApp.openBulkDeleteModal()"
+                        <button class="btn btn-danger btn-bulk" onclick="categoryPageApp.openBulkDeleteModal()"
                             id="bulkDeleteBtn">
                             <i class="bi bi-trash"></i> Delete Selected
                         </button>
-                        <button class="btn btn-success btn-bulk" onclick="userPageApp.openBulkRestoreModal()"
+                        <button class="btn btn-success btn-bulk" onclick="categoryPageApp.openBulkRestoreModal()"
                             id="bulkRestoreBtn" style="display:none;">
                             <i class="bi bi-arrow-counterclockwise"></i> Restore Selected
                         </button>
-                        <button class="btn btn-secondary btn-bulk" onclick="userPageApp.clearSelection()">
+                        <button class="btn btn-secondary btn-bulk" onclick="categoryPageApp.clearSelection()">
                             <i class="bi bi-x-circle"></i> Clear Selection
                         </button>
                     </div>
                 </div>
                 <table class="table table-hover mb-0">
                     <thead>
-
                         <tr>
                             <th width="50">
                                 <input type="checkbox" class="checkbox-custom" id="selectAll"
-                                    onchange="userPageApp.toggleSelectAll()">
+                                    onchange="categoryPageApp.toggleSelectAll()">
                             </th>
                             <th>#</th>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Created By</th>
+                            <th>Usage Count</th>
                             <th>Created</th>
                             <th>Updated</th>
                             <th width="150" class="text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="userTableBody">
+                    <tbody id="categoryTableBody">
                         <!-- JS render -->
                     </tbody>
                 </table>
@@ -117,10 +102,11 @@
         </div>
         <div class="mt-3" id="pagination"></div>
     </div>
+
+    <!-- Bulk Delete Modal -->
     <div class="modal fade" id="confirmBulkDeleteModal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
                         <i class="bi bi-exclamation-triangle"></i>
@@ -128,67 +114,63 @@
                     </h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
                     <p>
                         Are you sure you want to delete
-                        <strong id="bulkDeleteCount"></strong> users?
+                        <strong id="bulkDeleteCount"></strong> categories?
                     </p>
                     <p class="text-muted mb-0">
                         This action can be restored later.
                     </p>
                 </div>
-
                 <div class="modal-footer">
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-danger" onclick="userPageApp.confirmBulkDelete()">
+                    <button class="btn btn-danger" onclick="categoryPageApp.confirmBulkDelete()">
                         Delete
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
+
+    <!-- Bulk Restore Modal -->
     <div class="modal fade" id="confirmBulkRestoreModal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
+                    <h5 class="modal-title text-success">
+                        <i class="bi bi-arrow-counterclockwise"></i>
                         Confirm Bulk Restore
                     </h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
                     <p>
                         Are you sure you want to restore
-                        <strong id="bulkRestoreCount"></strong> users?
+                        <strong id="bulkRestoreCount"></strong> categories?
                     </p>
                     <p class="text-muted mb-0">
-                        This action can be restored later.
+                        This action will make the categories active again.
                     </p>
                 </div>
-
                 <div class="modal-footer">
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-success" onclick="userPageApp.confirmBulkRestore()">
+                    <button class="btn btn-success" onclick="categoryPageApp.confirmBulkRestore()">
                         Restore
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
+
+    <!-- Single Delete Modal -->
     <div class="modal fade" id="confirmDeleteModal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
                         <i class="bi bi-exclamation-triangle"></i>
@@ -196,34 +178,32 @@
                     </h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
                     <p>
-                        Are you sure you want to delete
-                        <strong id="bulkRestoreCount"></strong> users?
+                        Are you sure you want to delete this category?
                     </p>
                     <p class="text-muted mb-0">
-                        This action can be deleted later.
+                        This action can be restored later.
                     </p>
                 </div>
-
                 <div class="modal-footer">
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-success" onclick="userPageApp.confirmDelete()">
+                    <button class="btn btn-danger" onclick="categoryPageApp.confirmDelete()">
                         Delete
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="userPageApp.closeSidebar()"></div>
-    <div class="user-sidebar" id="userSidebar">
+
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="categoryPageApp.closeSidebar()"></div>
+    <div class="category-sidebar" id="categorySidebar">
         <div class="sidebar-header">
-            <h3 class="text-white"><i class="bx bx-user-circle"></i> User Details</h3>
-            <button class="btn-close-sidebar" onclick="userPageApp.closeSidebar()">
+            <h3 class="text-white"><i class="bx bx-category"></i> Category Details</h3>
+            <button class="btn-close-sidebar" onclick="categoryPageApp.closeSidebar()">
                 <i class="bx bx-menu"></i>
             </button>
         </div>
@@ -234,9 +214,10 @@
             <!-- Actions will be loaded here -->
         </div>
     </div>
+
     <script>
         window.routes = {
-            userEdit: "{{ url('/admin/users') }}"
+            categoryEdit: "{{ url('/admin/categories') }}"
         };
     </script>
 @endsection

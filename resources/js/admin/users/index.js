@@ -1,70 +1,94 @@
 const UserPage = {
+    /* ===================== STATE ===================== */
     state: {
         users: [],
         userShow: null,
         deletedUsers: [],
         idUserDelete: null,
+
         currentTab: 'active',
         userStatus: '',
         userRole: '',
         userVerified: '',
         search: '',
         perPage: 10,
+
         selectedUser: new Set(),
         currentPage: 1,
         pagination: {},
         loading: false,
     },
 
+    /* ===================== DOM CACHE ===================== */
+    dom: {},
+
+    /* ===================== INIT ===================== */
     init() {
+        this.cacheDom();
         this.bindEvents();
         this.fetchUsers();
     },
 
-    bindEvents() {
-        const searchInput = document.getElementById('searchInput');
-        const statusFilter = document.getElementById('statusFilter');
-        const roleFilter = document.getElementById('roleFilter');
-        const userVerified = document.getElementById('verifiedFilter');
-        const perPage = document.getElementById('perPage');
+    cacheDom() {
+        this.dom = {
+            searchInput: document.getElementById('searchInput'),
+            statusFilter: document.getElementById('statusFilter'),
+            roleFilter: document.getElementById('roleFilter'),
+            verifiedFilter: document.getElementById('verifiedFilter'),
+            perPage: document.getElementById('perPage'),
 
-        this.debounceSearch = this.debounce((e) => {
+            tbody: document.getElementById('userTableBody'),
+            pagination: document.getElementById('pagination'),
+
+            bulkBar: document.getElementById('bulkActionsBar'),
+            selectedCount: document.getElementById('selectedCount'),
+            selectAll: document.getElementById('selectAll'),
+        };
+    },
+
+    /* ===================== EVENTS ===================== */
+    bindEvents() {
+        if (!this.dom.searchInput) return;
+
+        this.debounceSearch = this.debounce(e => {
             this.state.search = e.target.value;
             this.state.currentPage = 1;
             this.fetchUsers();
         }, 400);
 
-        searchInput.addEventListener('input', this.debounceSearch);
+        this.dom.searchInput.addEventListener('input', this.debounceSearch);
 
-        statusFilter.addEventListener('change', (e) => {
+        this.dom.statusFilter?.addEventListener('change', e => {
             this.state.userStatus = e.target.value || null;
-            this.state.currentPage = 1;
-            this.fetchUsers();
+            this.resetAndFetch();
         });
 
-        roleFilter.addEventListener('change', (e) => {
+        this.dom.roleFilter?.addEventListener('change', e => {
             this.state.userRole = e.target.value || null;
-            this.state.currentPage = 1;
-            this.fetchUsers();
-        })
+            this.resetAndFetch();
+        });
 
-        userVerified.addEventListener('change', (e) => {
+        this.dom.verifiedFilter?.addEventListener('change', e => {
             this.state.userVerified = e.target.value;
-            this.state.currentPage = 1;
-            this.fetchUsers();
-        })
+            this.resetAndFetch();
+        });
 
-        perPage.addEventListener('change', (e) => {
+        this.dom.perPage?.addEventListener('change', e => {
             this.state.perPage = e.target.value;
-            this.state.currentPage = 1;
-            this.fetchUsers();
-        })
+            this.resetAndFetch();
+        });
     },
 
+    resetAndFetch() {
+        this.state.currentPage = 1;
+        this.fetchUsers();
+    },
+
+    /* ===================== API ===================== */
     async fetchUsers() {
         this.state.loading = true;
 
-        const response = await window.axios.get('/api/admin/users', {
+        const response = await axios.get('/api/admin/users', {
             params: {
                 trashed: this.state.currentTab,
                 search: this.state.search,
@@ -83,125 +107,200 @@ const UserPage = {
 
         this.renderTable();
         this.renderPagination();
+
         this.state.loading = false;
     },
 
+    /* ===================== BULK ACTION ===================== */
+    toggleSelectAll() {
+        const checked = this.dom.selectAll.checked;
+
+        this.state.users.forEach(user => {
+            checked
+                ? this.state.selectedUser.add(user.id)
+                : this.state.selectedUser.delete(user.id);
+        });
+
+        this.updateBulkActionBar();
+        this.renderTable();
+    },
+
+    toggleSelectUser(id) {
+        this.state.selectedUser.has(id)
+            ? this.state.selectedUser.delete(id)
+            : this.state.selectedUser.add(id);
+
+        this.updateBulkActionBar();
+        this.updateSelectAllCheckbox();
+    },
+
+    updateSelectAllCheckbox() {
+        const allSelected =
+            this.state.users.length > 0 &&
+            this.state.users.every(u => this.state.selectedUser.has(u.id));
+
+        this.dom.selectAll.checked = allSelected;
+    },
+
+    updateBulkActionBar() {
+        const count = this.state.selectedUser.size;
+        this.dom.selectedCount.textContent = count;
+
+        if (count > 0) {
+            this.dom.bulkBar.classList.add('show');
+        } else {
+            this.dom.bulkBar.classList.remove('show');
+        }
+
+        this.updateSelectAllCheckbox();
+    },
+
+    /* ===================== SIDEBAR ===================== */
+    async openUserSidebar(id) {
+        if (!id) return;
+
+        try {
+            const { data } = await axios.get(`/api/admin/users/${id}`);
+            this.state.userShow = data.data ?? data;
+            this.renderSidebar(this.state.userShow);
+        } catch (e) {
+            console.error('Load user failed', e);
+        }
+    },
+
+    /* ===================== DELETE / RESTORE ===================== */
     async confirmBulkDelete() {
         try {
-            const el = document.getElementById('confirmBulkDeleteModal');
-            const modal = el ? bootstrap.Modal.getInstance(el) : null;
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmBulkDeleteModal')
+            )?.hide();
 
-            if (modal) modal.hide();
-
-            await axios.post('/api/admin/users',
+            await axios.post(
+                '/api/admin/users',
                 Array.from(this.state.selectedUser)
             );
 
             this.state.selectedUser.clear();
             this.updateBulkActionBar();
-
             this.fetchUsers();
         } catch (e) {
-            alert('Bulk delete failed');
             console.error(e);
+            alert('Bulk delete failed');
         }
     },
 
     async confirmBulkRestore() {
         try {
-            const el = document.getElementById('confirmBulkRestoreModal');
-            const modal = el ? bootstrap.Modal.getInstance(el) : null;
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmBulkRestoreModal')
+            )?.hide();
 
-            if (modal) modal.hide();
-
-            await axios.patch('/api/admin/users/restore', Array.from(this.state.selectedUser));
+            await axios.patch(
+                '/api/admin/users/restore',
+                Array.from(this.state.selectedUser)
+            );
 
             this.state.selectedUser.clear();
             this.updateBulkActionBar();
-
             this.fetchUsers();
         } catch (e) {
-            alert('Bulk delete failed');
             console.error(e);
+            alert('Bulk restore failed');
         }
     },
 
     async confirmDelete() {
         try {
-            const el = document.getElementById('confirmDeleteModal');
-            bootstrap.Modal.getOrCreateInstance(el)?.hide();
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmDeleteModal')
+            )?.hide();
 
-            const res = await axios.delete(`/api/admin/users/${this.idUserDelete}/delete`);
+            await axios.delete(
+                `/api/admin/users/${this.state.idUserDelete}/delete`
+            );
 
-            if (res.status !== 200) {
-                throw new Error('Delete failed');
-            }
-
-            this.idUserDelete = null;
+            this.state.idUserDelete = null;
             this.fetchUsers();
-
         } catch (e) {
             console.error(e);
             alert('Delete failed');
         }
     },
 
-    async openUserSidebar(id) {
-        if (!id) return;
-
-        try {
-            const { data } = await axios.get(`/api/admin/users/${id}`);
-
-            this.state.userShow = data.data ?? data;
-            this.openSidebar(this.state.userShow);
-        } catch (e) {
-            console.error('Load user failed', e);
-        }
-    },
-
-    openBulkDeleteModal() {
-        if (this.state.selectedUser.size === 0) return;
-
-        document.getElementById('bulkDeleteCount').innerText =
-            this.state.selectedUser.size;
-
-        new bootstrap.Modal(
-            document.getElementById('confirmBulkDeleteModal')
-        ).show();
-    },
-
-    openBulkRestoreModal() {
-        if (this.state.selectedUser.size === 0) return;
-
-        document.getElementById('bulkRestoreCount').innerText =
-            this.state.selectedUser.size;
-
-        new bootstrap.Modal(
-            document.getElementById('confirmBulkRestoreModal')
-        ).show();
-    },
-
     openDeleteModal(id) {
-        if(!id) return;
-
-        this.idUserDelete = id;
-
+        this.state.idUserDelete = id;
         new bootstrap.Modal(
             document.getElementById('confirmDeleteModal')
         ).show();
     },
 
+    openBulkDeleteModal() {
+        const count = this.state.selectedUser.size;
 
+        if (!count) return;
+
+        document.getElementById('bulkDeleteCount').innerText = count;
+
+        const modalEl = document.getElementById('confirmBulkDeleteModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    },
+
+    openBulkRestoreModal() {
+        const count = this.state.selectedUser.size;
+
+        if (!count) return;
+
+        document.getElementById('bulkRestoreCount').innerText = count;
+
+        const modalEl = document.getElementById('confirmBulkRestoreModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    },
+
+    clearSelection() {
+        // 1. Reset state trước
+        this.state.selectedUser.clear();
+
+        // 2. Reset select all
+        if (this.dom.selectAll) {
+            this.dom.selectAll.checked = false;
+        }
+
+        // 3. Render lại UI theo state
+        this.renderTable();
+
+        // 4. Update bulk bar
+        this.updateBulkActionBar();
+    },
+
+
+
+    /* ===================== TAB ===================== */
+    switchTab(tab, el) {
+        this.state.currentTab = tab;
+        this.state.selectedUser.clear();
+        this.state.currentPage = 1;
+
+        document
+            .querySelectorAll('.nav-tabs-custom .nav-link')
+            .forEach(l => l.classList.remove('active'));
+
+        el.classList.add('active');
+
+        history.replaceState({}, '', location.pathname);
+        this.fetchUsers();
+    },
+
+    /* ===================== RENDER ===================== */
     renderTable() {
-        const tbody = document.getElementById('userTableBody');
-
-
+        const tbody = this.dom.tbody;
         tbody.innerHTML = '';
 
         if (!this.state.users.length) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted">
+                    <td colspan="9" class="text-center text-muted">
                         No users found
                     </td>
                 </tr>
@@ -270,200 +369,123 @@ const UserPage = {
         this.updateBulkActionBar();
     },
 
-    //Component: Select checkbox
-    toggleSelectAll() {
-        const selectAllCheckbox = document.getElementById('selectAll');
-        const currentData = this.state.users;
-
-        if (selectAllCheckbox.checked) {
-            currentData.forEach(user => this.state.selectedUser.add(user.id));
-        } else {
-            currentData.forEach(user => this.state.selectedUser.delete(user.id));
-        }
-
-        this.updateBulkActionBar();
-        this.updateSelectAllCheckbox();
-        this.renderTable();
-    },
-
-    toggleSelectUser(userId) {
-        if (this.state.selectedUser.has(userId)) {
-            this.state.selectedUser.delete(userId);
-        } else {
-            this.state.selectedUser.add(userId);
-        }
-
-        this.updateBulkActionBar();
-        this.updateSelectAllCheckbox();
-    },
-
-    updateSelectAllCheckbox() {
-        const selectAllCheckbox = document.getElementById('selectAll');
-        const currentData = this.state.users;
-        const allSelected = currentData.length > 0 && currentData.every(user => this.state.selectedUser.has(user.id));
-
-        selectAllCheckbox.checked = allSelected;
-    },
-
-    clearSelection() {
-        this.state.selectedUser.clear();
-        this.renderTable();
-    },
-
-    updateBulkActionBar() {
-        const bar = document.getElementById('bulkActionsBar');
-        const count = this.state.selectedUser.size;
-        const countSpan = document.getElementById('selectedCount');
-        const deleteBtn = document.getElementById('bulkDeleteBtn');
-        const restoreBtn = document.getElementById('bulkRestoreBtn');
-
-        countSpan.textContent = count;
-
-        if (count > 0) {
-            bar.classList.add('show');
-            if (this.state.currentTab === 'active') {
-                deleteBtn.style.display = 'inline-block';
-                restoreBtn.style.display = 'none';
-            } else {
-                deleteBtn.style.display = 'none';
-                restoreBtn.style.display = 'inline-block';
-            }
-        } else {
-            bar.classList.remove('show');
-        }
-
-        this.updateSelectAllCheckbox();
-    },
-
-    //Component: Switch tab
-    switchTab(tab) {
-        this.state.currentTab = tab;
-        this.state.selectedUser.clear();
-        this.state.currentPage = 1;
-
-        document.querySelectorAll('.nav-tabs-custom .nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        event.target.classList.add('active');
-
-        const cleanUrl = window.location.origin + window.location.pathname;
-        history.replaceState({}, '', cleanUrl);
-
-        this.fetchUsers();
-        this.renderTable();
-        this.renderPagination();
-    },
-
-    // Component: Sidebar
-    openSidebar(user) {
+    renderSidebar(user) {
         const sidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const content = document.getElementById('sidebarContent');
-        const actions = document.getElementById('sidebarActions');
 
-        const isDeleted = user.deleted_at !== null;
+        if (!sidebar || !overlay || !content) return;
 
-        // Render content
+        const initials = user.full_name
+            ?.split(' ')
+            .map(w => w[0])
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
+
         content.innerHTML = `
-                    <div class="user-avatar-large">
-                        ${user.avatar
+        <div class="user-avatar-large">
+            ${user.avatar
                 ? `<img src="/${user.avatar}" class="avatar-large" alt="${user.full_name}">`
                 : `<div class="avatar-placeholder-large">${initials}</div>`
             }
-                        <div class="user-name-large">${user.full_name}</div>
-                        <div class="user-username-large">@${user.user_name}</div>
-                    </div>
+            <div class="user-name-large">${user.full_name}</div>
+            <div class="user-username-large">@${user.user_name}</div>
+        </div>
 
-                    <div class="info-group">
-                        <div class="info-group-title">Contact Information</div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-envelope"></i>
-                                Email
-                            </span>
-                            <span class="info-value">${user.email}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-patch-check"></i>
-                                Email Verified
-                            </span>
-                            <span class="info-value">
-                                ${user.email_verified_at
+        <div class="info-group">
+            <div class="info-group-title">Contact Information</div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-envelope"></i> Email
+                </span>
+                <span class="info-value">${user.email}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-patch-check"></i> Email Verified
+                </span>
+                <span class="info-value">
+                    ${user.email_verified_at
                 ? `<span class="badge bg-success">Verified</span>`
-                : `<span class="badge bg-warning">Not Verified</span>`}
-                            </span>
-                        </div>
-                    </div>
+                : `<span class="badge bg-warning">Not Verified</span>`
+            }
+                </span>
+            </div>
+        </div>
 
-                    <div class="info-group">
-                        <div class="info-group-title">Personal Information</div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-calendar-heart"></i>
-                                Birthday
-                            </span>
-                            <span class="info-value">${user.birthday.date || 'N/A'}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-gender-ambiguous"></i>
-                                Gender
-                            </span>
-                            <span class="info-value">
-                                ${user.sex.value === 0
+        <div class="info-group">
+            <div class="info-group-title">Personal Information</div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-calendar-heart"></i> Birthday
+                </span>
+                <span class="info-value">
+                    ${user.birthday?.date || 'N/A'}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-gender-ambiguous"></i> Gender
+                </span>
+                <span class="info-value">
+                    ${user.sex?.value === 0
                 ? '<i class="bx bx-male text-primary"></i> Male'
-                : user.sex.value === 1
+                : user.sex?.value === 1
                     ? '<i class="bx bx-female text-danger"></i> Female'
-                    : 'Other'}
-                            </span>
-                        </div>
-                    </div>
+                    : 'Other'
+            }
+                </span>
+            </div>
+        </div>
 
-                    <div class="info-group">
-                        <div class="info-group-title">Account Information</div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-shield-check"></i>
-                                Role
-                            </span>
-                            <span class="info-value">
-                                <span class="badge bg-${user.role.color || 'secondary'}">
-                                    ${user.role.name}
-                                </span>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-power"></i>
-                                Status
-                            </span>
-                            <span class="info-value">
-                                <span class="badge bg-${user.status.color || 'danger'}">
-                                    ${user.status.name}
-                                </span>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="bi bi-clock-history"></i>
-                                Created At
-                            </span>
-                            <span class="info-value">${user.created_at.date}</span>
-                        </div>
-                        ${user.deleted_at ? `
-                            <div class="info-row">
-                                <span class="info-label">
-                                    <i class="bi bi-trash"></i>
-                                    Deleted At
-                                </span>
-                                <span class="info-value text-danger">${user.deleted_at}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+        <div class="info-group">
+            <div class="info-group-title">Account Information</div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-shield-check"></i> Role
+                </span>
+                <span class="info-value">
+                    <span class="badge bg-${user.role.color}">
+                        ${user.role.name}
+                    </span>
+                </span>
+            </div>
 
-        // Show sidebar
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-power"></i> Status
+                </span>
+                <span class="info-value">
+                    <span class="badge bg-${user.status.color}">
+                        ${user.status.name}
+                    </span>
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-clock-history"></i> Created At
+                </span>
+                <span class="info-value">${user.created_at.date}</span>
+            </div>
+
+            ${user.deleted_at
+                ? `
+                        <div class="info-row">
+                            <span class="info-label text-danger">
+                                <i class="bi bi-trash"></i> Deleted At
+                            </span>
+                            <span class="info-value text-danger">
+                                ${user.deleted_at}
+                            </span>
+                        </div>
+                    `
+                : ''
+            }
+        </div>
+    `;
+
         sidebar.classList.add('show');
         overlay.classList.add('show');
     },
@@ -472,54 +494,45 @@ const UserPage = {
         const sidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
 
-        sidebar.classList.remove('show');
-        overlay.classList.remove('show');
+        sidebar?.classList.remove('show');
+        overlay?.classList.remove('show');
     },
 
     renderPagination() {
-        const container = document.getElementById('pagination');
-        if (!container) return;
-
+        const container = this.dom.pagination;
         const meta = this.state.pagination;
-        if (!meta || !meta.links) {
+
+        if (!meta?.links) {
             container.innerHTML = '';
             return;
         }
 
-        container.innerHTML = '';
-
-        meta.links.forEach(link => {
-            const li = document.createElement('li');
-            li.classList.add('page-item');
-
-            if (link.active) li.classList.add('active');
-            if (!link.url) li.classList.add('disabled');
-
-            const a = document.createElement('a');
-            a.classList.add('page-link');
-            a.href = 'javascript:void(0)';
-            a.innerHTML = link.label;
-
-            if (link.url) {
-                a.addEventListener('click', () => {
-                    const url = new URL(link.url);
-                    const page = url.searchParams.get('UserDashboard');
-
-                    if (!page) return;
-
-                    // cập nhật query string
-                    this.setQuery('UserDashboard', page);
-
-                    // fetch lại data
-                    this.fetchUsers();
-                });
-            }
-
-            li.appendChild(a);
-            container.appendChild(li);
-        });
+        container.innerHTML = meta.links.map(link => `
+            <li class="page-item ${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)"
+                   onclick="${link.url ? `userPageApp.goPage('${link.url}')` : ''}">
+                    ${link.label}
+                </a>
+            </li>
+        `).join('');
     },
 
+    goPage(url) {
+        const page = new URL(url).searchParams.get('page');
+        if (!page) return;
+
+        this.setQuery('page', page);
+        this.fetchUsers();
+    },
+
+    /* ===================== UTIL ===================== */
+    debounce(fn, delay) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, args), delay);
+        };
+    },
 
     getQueryParams() {
         return Object.fromEntries(new URLSearchParams(location.search));
@@ -527,20 +540,11 @@ const UserPage = {
 
     setQuery(key, value) {
         const params = new URLSearchParams(location.search);
-        value ? params.set(key, value) : params.delete(key);
-        history.replaceState(null, '', '?' + params.toString());
-    },
-
-    debounce(fn, delay) {
-        let t;
-        return (...args) => {
-            clearTimeout(t);
-            t = setTimeout(() => fn.apply(this, args), delay);
-        };
+        params.set(key, value);
+        history.replaceState({}, '', '?' + params.toString());
     }
 };
 
+/* ===================== BOOT ===================== */
 window.userPageApp = UserPage;
-
-
 document.addEventListener('DOMContentLoaded', () => UserPage.init());
