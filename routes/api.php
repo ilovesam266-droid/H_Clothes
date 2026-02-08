@@ -1,22 +1,32 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/admin')->name('api.admin.')->group(function () {
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+
     Route::get('/users', [UserController::class, 'index'])->name('users');
-    Route::post('/users', [UserController::class, 'destroy'])->name('users-delete');
+    Route::post('/users', [UserController::class, 'destroy'])->name('users-del');
     Route::patch('/users/restore', [UserController::class,'restore'])->name('user-restore');
     Route::get('/users/{id}', [UserController::class,'show'])->name('user-show');
     Route::post('/users/create', [UserController::class,'store'])->name('user-create');
     Route::post('/users/{id}/edit', [UserController::class,'update'])->name('user-edit'); // PHP can't parse
-    Route::delete('/users/{id}/delete', [UserController::class,'delete'])->name('user-delete');
+    Route::delete('/users/{id}/delete', [UserController::class,'delete'])->name('user-del');
 
     Route::get('/products', [ProductController::class, 'index'])->name('products');
-    Route::post('/products', [ProductController::class,'destroy'])->name('products-delete');
+    Route::post('/products', [ProductController::class,'destroy'])->name('products-del');
     Route::patch('/products/restore', [ProductController::class,'restore'])->name('products-restore');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-});
+    Route::post('/categories', [CategoryController::class, 'destroy'])->name('categories-del');
+    Route::patch('/categories', [CategoryController::class, 'restore'])->name('categories-restore');
+    Route::post('/categories/create', [CategoryController::class, 'store'])->name('category-create');
+    Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('category-show');
+    Route::post('/categories/{id}/edit', [CategoryController::class,'update'])->name('category-edit');
+    Route::delete('/categories/{id}/delete', [CategoryController::class,'delete'])->name('user-del');
+
+})->middleware('auth:sanctum');

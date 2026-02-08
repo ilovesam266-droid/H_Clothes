@@ -27,8 +27,11 @@ class AuthController extends Controller
 
         //check user info for login
         if(Auth::attempt($attempt)){
-            $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            // $request->session()->regenerate();
+            $user = Auth::user();
+            $token = $user->createToken('api-token')->plainTextToken;
+            // return redirect()->intended(route('admin.dashboard'));
+            return $token;
         }
         return back()->withErrors([
             'login_string' => 'Wrong account or password',

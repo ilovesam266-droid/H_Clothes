@@ -65,7 +65,7 @@
                         <h4 class="mb-2">Welcome to Sneat! 👋</h4>
                         <p class="mb-4">Please sign-in to your account and start the adventure</p>
 
-                        <form id="formAuthentication" class="mb-3" action="{{ route('admin.login') }}" method="POST">
+                        <form id="formAuthentication" class="mb-3" action="{{ route('api.admin.login') }}" method="POST">
                             @csrf
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email or Username</label>

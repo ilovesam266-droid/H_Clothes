@@ -15,7 +15,7 @@ Route::prefix('/admin')->name('admin.')->group(function(){
     Route::get('/login', [AuthController::class, 'loginShow'])->name('loginShow');
     Route::get('/register', [AuthController::class, 'registerShow'])->name('register');
     Route::get('/forgot', [AuthController::class, 'forgotShow'])->name('forgot');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+
 
     Route::get('/dashboard', [DashboardController::class, 'dashboardShow'])->name('dashboard');
     Route::get('/users', [AdminUserController::class,'index'])->name('users');
@@ -25,4 +25,4 @@ Route::prefix('/admin')->name('admin.')->group(function(){
     Route::get('/products', [ProductController::class,'index'])->name('products');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-});
+})->middleware('auth:sanctum');
