@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Api\Admin\AddressController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\UserController;
@@ -27,6 +28,13 @@ Route::prefix('/admin')->name('api.admin.')->group(function () {
     Route::post('/categories/create', [CategoryController::class, 'store'])->name('category-create');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('category-show');
     Route::post('/categories/{id}/edit', [CategoryController::class,'update'])->name('category-edit');
-    Route::delete('/categories/{id}/delete', [CategoryController::class,'delete'])->name('user-del');
+    Route::delete('/categories/{id}/delete', [CategoryController::class,'delete'])->name('category-del');
+
+    Route::get('/users/{id}/addresses', [AddressController::class, 'index'])->name('addresses');
+    Route::post('/users/{id}/addresses/create', [AddressController::class, 'store'])->name('addresses-create');
+    Route::get('/addresses/{id}', [AddressController::class, 'show'])->name('addresses-show');
+    Route::post('/addresses/{id}', [AddressController::class, 'update'])->name('address-edit');
+    Route::post('/addresses', [AddressController::class, 'destroy'])->name('address-delete');
+
 
 })->middleware('auth:sanctum');
