@@ -518,10 +518,10 @@ const UserPage = {
     },
 
     goPage(url) {
-        const page = new URL(url).searchParams.get('page');
+        const page = new URL(url).searchParams.get('UserDashboard');
         if (!page) return;
 
-        this.setQuery('page', page);
+        this.setQuery('UserDashboard', page);
         this.fetchUsers();
     },
 

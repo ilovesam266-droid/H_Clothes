@@ -1,3 +1,5 @@
+import Pagination from "../pagination.js";
+
 const CategoryPage = {
     /* ===================== STATE ===================== */
     state: {
@@ -85,7 +87,7 @@ const CategoryPage = {
                     created_by: this.state.createdBy,
                     date: this.state.date,
                 },
-                page: this.state.currentPage
+                ...this.getQueryParams(),
             }
         });
 
@@ -152,26 +154,90 @@ const CategoryPage = {
 
     /* ===================== DELETE / RESTORE ===================== */
     async confirmBulkDelete() {
-        await axios.post('/api/admin/categories/delete', [...this.state.selected]);
-        this.clearSelection();
-        this.fetchCategories();
+        try {
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmBulkDeleteModal')
+            )?.hide();
+
+            await axios.post('/api/admin/categories', [...this.state.selected]);
+
+            this.clearSelection();
+            this.fetchCategories();
+        } catch (e) {
+            console.error(e);
+            alert('Bulk delete failed');
+        }
     },
 
     async confirmBulkRestore() {
-        await axios.patch('/api/admin/categories/restore', [...this.state.selected]);
-        this.clearSelection();
-        this.fetchCategories();
+        try {
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmBulkRestoreModal')
+            )?.hide();
+
+            await axios.patch('/api/admin/categories', [...this.state.selected]);
+            this.clearSelection();
+            this.fetchCategories();
+        } catch (e) {
+            console.error(e);
+            alert('Bulk restore failed');
+        }
     },
 
     async confirmDelete() {
-        await axios.delete(`/api/admin/categories/${this.state.deleteId}`);
-        this.state.deleteId = null;
-        this.fetchCategories();
+        try {
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmDeleteModal')
+            )?.hide();
+
+            await axios.delete(`/api/admin/categories/${this.state.deleteId}/delete`);
+            this.state.deleteId = null;
+            this.fetchCategories();
+        } catch (e) {
+            console.error(e);
+            alert('Delete failed');
+        }
     },
 
     openDeleteModal(id) {
         this.state.deleteId = id;
         new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
+    },
+
+    openBulkDeleteModal() {
+        const count = this.state.selected.size;
+
+        if (!count) return;
+
+        document.getElementById('bulkDeleteCount').innerText = count;
+
+        const modalEl = document.getElementById('confirmBulkDeleteModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    },
+
+    openBulkRestoreModal() {
+        const count = this.state.selected.size;
+
+        if (!count) return;
+
+        document.getElementById('bulkRestoreCount').innerText = count;
+
+        const modalEl = document.getElementById('confirmBulkRestoreModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    },
+
+    clearSelection() {
+        this.state.selected.clear();
+
+        if (this.dom.selectAll) {
+            this.dom.selectAll.checked = false;
+        }
+
+        this.renderTable();
+
+        this.updateBulkBar();
     },
 
     /* ===================== TAB ===================== */
@@ -245,23 +311,16 @@ const CategoryPage = {
     },
 
     renderPagination() {
-        const meta = this.state.pagination;
-        if (!meta?.links) return;
-
-        this.dom.pagination.innerHTML = meta.links.map(l => `
-            <li class="page-item ${l.active ? 'active' : ''} ${!l.url ? 'disabled' : ''}">
-                <a class="page-link"
-                    href="javascript:void(0)"
-                    onclick="${l.url ? `categoryPageApp.goPage('${l.url}')` : ''}">
-                    ${l.label}
-                </a>
-            </li>
-        `).join('');
+        console.log(this.dom.pagination);
+        this.pagination = new Pagination(this.dom.pagination, (url) => this.goPage(url));
+        this.pagination.render(this.state.pagination);
     },
 
     goPage(url) {
-        const page = new URL(url).searchParams.get('page');
-        this.state.currentPage = page;
+        const page = new URL(url).searchParams.get('CategoryDashboard');
+        if (!page) return;
+
+        this.setQuery('CategoryDashboard', page);
         this.fetchCategories();
     },
 
@@ -272,6 +331,16 @@ const CategoryPage = {
             clearTimeout(t);
             t = setTimeout(() => fn.apply(this, args), delay);
         };
+    },
+
+    getQueryParams() {
+        return Object.fromEntries(new URLSearchParams(location.search));
+    },
+
+    setQuery(key, value) {
+        const params = new URLSearchParams(location.search);
+        params.set(key, value);
+        history.replaceState({}, '', '?' + params.toString());
     }
 };
 

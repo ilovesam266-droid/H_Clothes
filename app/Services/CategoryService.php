@@ -17,10 +17,10 @@ class CategoryService
         $this->categoryRepo = $category;
     }
 
-    public function getAllCategory(){
-        $categories = $this->categoryRepo->getAll();
+    public function getAllCategory($request){
+        $categories = $this->categoryRepo->getAll($request);
 
-        return Resource::collection($categories);
+        return $categories;
     }
 
     public function storeCategory($data, $user) {
@@ -29,7 +29,7 @@ class CategoryService
 
         $category = $this->categoryRepo->create($data);
 
-        return new Resource($category);
+        return $category;
     }
 
     public function updateCategory($id, $data)

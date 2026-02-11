@@ -5,55 +5,31 @@
 @section('content')
     <div class="container-fluid" id="admin-category-page">
         <div class="d-flex justify-content-between mb-2">
-            <div class="tabs-section">
-                <ul class="nav nav-tabs nav-tabs-custom">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="categoryPageApp.switchTab('active')">
-                            Active Categories <span class="badge-count" id="activeCount">0</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="categoryPageApp.switchTab('only')">
-                            <i class="bi bi-trash"></i> Deleted Categories <span class="badge-count" id="deletedCount">0</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <x-tabs-section>
+                <x-tabs-section.item nameTab='Active Categories' pageManager="categoryPageApp" event="switchTab('active')"
+                    spanId="activeCount" :isActive=true></x-tabs-section.item>
+                <x-tabs-section.item nameTab="Deleted Categories" pageManager="categoryPageApp" event="switchTab('only')"
+                    spanId="deletedCount"></x-tabs-section.item>
+            </x-tabs-section>
             <button class="btn btn-add-category text-white" onclick="categoryPageApp.addCategory()">
                 <i class="bx bx-plus-circle"></i> Add New Category
             </button>
         </div>
 
         <div class="card">
-            <div class="card-body flex gap-2">
-                <div class="search-box">
-                    <i class="bx bx-search"></i>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, slug...">
-                </div>
-            </div>
-            <div class="card-body flex gap-2" style="padding-top: 0px;">
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <select class="form-select" id="createdByFilter">
-                            <option value="">All Creators</option>
-                            <!-- Populate dynamically with users -->
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-select" id="perPage">
-                            <option value="10">10 / page</option>
-                            <option value="25">25 / page</option>
-                            <option value="50">50 / page</option>
-                            <option value="100">100 / page</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <x-search-box placeholder="Search by name, slug..." />
+
+            <x-filters>
+                <x-filters-box.filter-box-select id="perPage">
+                    <option value="10">10 / page</option>
+                    <option value="25">25 / page</option>
+                    <option value="50">50 / page</option>
+                    <option value="100">100 / page</option>
+                </x-filters-box.filter-box-select>
+            </x-filters>
+
             <div class="card-body p-0">
-                <div class="bulk-actions" id="bulkActionsBar">
+                {{-- <div class="bulk-actions" id="bulkActionsBar">
                     <div>
                         <span class="selected-count">
                             <i class="bi bi-check-circle-fill"></i>
@@ -73,7 +49,13 @@
                             <i class="bi bi-x-circle"></i> Clear Selection
                         </button>
                     </div>
-                </div>
+                </div> --}}
+
+                <x-bulk-actions name="Categories selected">
+                    <x-button-action btnName="Delete Selected" id="bulkDeleteBtn" pageManager="categoryPageApp" event="openBulkDeleteModal()" color="danger"/>
+                    <x-button-action btnName="Restore Selected" id="bulkRestoreBtn" pageManager="categoryPageApp" event="openBulkRestoreModal()" color="success"/>
+                    <x-button-action btnName="Clear Selection" pageManager="categoryPageApp" event="clearSelection()" color="secondary"/>
+                </x-bulk-actions>
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>

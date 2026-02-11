@@ -13,16 +13,34 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         return Category::class;
     }
 
-    public function getAll(){
+    public function getAll($request){
         return $this->all(
-            criteria: function ($query){
+            criteria: function ($query) use ($request){
                 $query->with('creator', function ($q) {
                     $q->select('id', 'user_name', 'email');
                 });
+
+                $query->when(
+                    $request->trashed ?? null,
+                    function ($q, $trashed) {
+                        match ($trashed) {
+                            'only' => $q->onlyTrashed(),
+                            'with' => $q->withTrashed(),
+                            'active' => null,
+                        };
+                    }
+                );
+
+                $query->when(isset($request->search), function ($innerQuery) use ($request) {
+                    $innerQuery->where(function ($subQuery) use ($request) {
+                        $subQuery->where('name', '=', $request->search)
+                        ->orWhere('slug', '=', $request->search);
+                    });
+                });
             },
-            perPage: 10,
+            perPage: $request->perPage ?? 10,
             columns: ['*'],
-            pageName: 'Category Dashboard');
+            pageName: 'CategoryDashboard');
     }
 
     public function getCategoryById($idOrCriteria) {

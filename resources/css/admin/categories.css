@@ -301,8 +301,8 @@ input[type="date"]:focus {
 }
 
 .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: primary;
+    border-color: primary;
     color: white;
 }
 

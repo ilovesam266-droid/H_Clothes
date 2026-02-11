@@ -36,5 +36,4 @@ Route::prefix('/admin')->name('api.admin.')->group(function () {
     Route::post('/addresses/{id}', [AddressController::class, 'update'])->name('address-edit');
     Route::post('/addresses', [AddressController::class, 'destroy'])->name('address-delete');
 
-
 })->middleware('auth:sanctum');
