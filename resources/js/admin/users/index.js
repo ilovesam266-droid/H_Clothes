@@ -121,8 +121,8 @@ const UserPage = {
                 : this.state.selectedUser.delete(user.id);
         });
 
-        this.updateBulkActionBar();
         this.renderTable();
+        this.updateBulkActionBar();
     },
 
     toggleSelectUser(id) {
@@ -146,13 +146,13 @@ const UserPage = {
         const count = this.state.selectedUser.size;
         this.dom.selectedCount.textContent = count;
 
-        if (count > 0) {
-            this.dom.bulkBar.classList.add('show');
-        } else {
-            this.dom.bulkBar.classList.remove('show');
-        }
+        this.dom.bulkBar.classList.toggle('show', count > 0);
 
-        this.updateSelectAllCheckbox();
+        document.getElementById('bulkDeleteBtn').style.display =
+            this.state.currentTab === 'active' ? 'inline-block' : 'none';
+
+        document.getElementById('bulkRestoreBtn').style.display =
+            this.state.currentTab !== 'active' ? 'inline-block' : 'none';
     },
 
     /* ===================== SIDEBAR ===================== */
@@ -279,8 +279,7 @@ const UserPage = {
     /* ===================== TAB ===================== */
     switchTab(tab, el) {
         this.state.currentTab = tab;
-        this.state.selectedUser.clear();
-        this.state.currentPage = 1;
+        this.clearSelection();
 
         document
             .querySelectorAll('.nav-tabs-custom .nav-link')
@@ -314,7 +313,7 @@ const UserPage = {
             tbody.innerHTML += `
                 <tr class="${isSelected ? 'table-active' : ''}">
                     <td>
-                                <input type="checkbox" class="checkbox-custom user-checkbox"
+                                <input type="checkbox"
                                     data-user-id="${user.id}"
                                     ${isSelected ? 'checked' : ''}
                                     onchange="userPageApp.toggleSelectUser(${user.id})">

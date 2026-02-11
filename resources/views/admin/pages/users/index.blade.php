@@ -19,7 +19,7 @@
                     </li>
                 </ul>
             </div>
-            <a class="btn btn-add-user text-white" href="{{ route('admin.user-create') }}">
+            <a class="btn btn-add text-white" href="{{ route('admin.user-create') }}">
                 <i class="bx bx-plus-circle"></i> Add New User
             </a>
         </div>
@@ -80,7 +80,7 @@
                             <i class="bi bi-trash"></i> Delete Selected
                         </button>
                         <button class="btn btn-success btn-bulk" onclick="userPageApp.openBulkRestoreModal()"
-                            id="bulkRestoreBtn" style="display:none;">
+                            id="bulkRestoreBtn">
                             <i class="bi bi-arrow-counterclockwise"></i> Restore Selected
                         </button>
                         <button class="btn btn-secondary btn-bulk" onclick="userPageApp.clearSelection()">
@@ -90,7 +90,6 @@
                 </div>
                 <table class="table table-hover mb-0">
                     <thead>
-
                         <tr>
                             <th width="50">
                                 <input type="checkbox" class="checkbox-custom" id="selectAll"

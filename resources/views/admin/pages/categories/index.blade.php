@@ -6,12 +6,12 @@
     <div class="container-fluid" id="admin-category-page">
         <div class="d-flex justify-content-between mb-2">
             <x-tabs-section>
-                <x-tabs-section.item nameTab='Active Categories' pageManager="categoryPageApp" event="switchTab('active')"
+                <x-tabs-section.item nameTab='Active Categories' pageManager="categoryPageApp" event="switchTab('active', this)"
                     spanId="activeCount" :isActive=true></x-tabs-section.item>
-                <x-tabs-section.item nameTab="Deleted Categories" pageManager="categoryPageApp" event="switchTab('only')"
+                <x-tabs-section.item nameTab="Deleted Categories" pageManager="categoryPageApp" event="switchTab('only', this)"
                     spanId="deletedCount"></x-tabs-section.item>
             </x-tabs-section>
-            <button class="btn btn-add-category text-white" onclick="categoryPageApp.addCategory()">
+            <button class="btn btn-add text-white" onclick="categoryPageApp.addCategory()">
                 <i class="bx bx-plus-circle"></i> Add New Category
             </button>
         </div>
@@ -29,54 +29,26 @@
             </x-filters>
 
             <div class="card-body p-0">
-                {{-- <div class="bulk-actions" id="bulkActionsBar">
-                    <div>
-                        <span class="selected-count">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span id="selectedCount">0</span> Categories selected
-                        </span>
-                    </div>
-                    <div>
-                        <button class="btn btn-danger btn-bulk" onclick="categoryPageApp.openBulkDeleteModal()"
-                            id="bulkDeleteBtn">
-                            <i class="bi bi-trash"></i> Delete Selected
-                        </button>
-                        <button class="btn btn-success btn-bulk" onclick="categoryPageApp.openBulkRestoreModal()"
-                            id="bulkRestoreBtn" style="display:none;">
-                            <i class="bi bi-arrow-counterclockwise"></i> Restore Selected
-                        </button>
-                        <button class="btn btn-secondary btn-bulk" onclick="categoryPageApp.clearSelection()">
-                            <i class="bi bi-x-circle"></i> Clear Selection
-                        </button>
-                    </div>
-                </div> --}}
-
                 <x-bulk-actions name="Categories selected">
-                    <x-button-action btnName="Delete Selected" id="bulkDeleteBtn" pageManager="categoryPageApp" event="openBulkDeleteModal()" color="danger"/>
-                    <x-button-action btnName="Restore Selected" id="bulkRestoreBtn" pageManager="categoryPageApp" event="openBulkRestoreModal()" color="success"/>
-                    <x-button-action btnName="Clear Selection" pageManager="categoryPageApp" event="clearSelection()" color="secondary"/>
+                    <x-button-action btnName="Delete Selected" id="bulkDeleteBtn" pageManager="categoryPageApp"
+                        event="openBulkDeleteModal()" color="danger" />
+                    <x-button-action btnName="Restore Selected" id="bulkRestoreBtn" pageManager="categoryPageApp"
+                        event="openBulkRestoreModal()" color="success" />
+                    <x-button-action btnName="Clear Selection" pageManager="categoryPageApp" event="clearSelection()"
+                        color="secondary" />
                 </x-bulk-actions>
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th width="50">
-                                <input type="checkbox" class="checkbox-custom" id="selectAll"
-                                    onchange="categoryPageApp.toggleSelectAll()">
-                            </th>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Slug</th>
-                            <th>Created By</th>
-                            <th>Usage Count</th>
-                            <th>Created</th>
-                            <th>Updated</th>
-                            <th width="150" class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="categoryTableBody">
-                        <!-- JS render -->
-                    </tbody>
-                </table>
+
+                <x-table id="categoryTableBody" pageManager="categoryPageApp">
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Created By</th>
+                    <th>Usage Count</th>
+                    <th>Created</th>
+                    <th>Updated</th>
+                    <th width="150" class="text-center">Actions</th>
+                </x-table>
+
                 <nav>
                     <ul id="pagination" class="pagination justify-content-end"></ul>
                 </nav>
@@ -86,36 +58,15 @@
     </div>
 
     <!-- Bulk Delete Modal -->
-    <div class="modal fade" id="confirmBulkDeleteModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Confirm Bulk Delete
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Are you sure you want to delete
-                        <strong id="bulkDeleteCount"></strong> categories?
-                    </p>
-                    <p class="text-muted mb-0">
-                        This action can be restored later.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-danger" onclick="categoryPageApp.confirmBulkDelete()">
-                        Delete
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-modal nameModal="Confirm Bulk Delete" pageManager="categoryPageApp" event="confirmBulkDelete()">
+        <p>
+            Are you sure you want to delete
+            <strong id="bulkDeleteCount"></strong> categories?
+        </p>
+        <p class="text-muted mb-0">
+            This action can be restored later.
+        </p>
+    </x-modal>
 
     <!-- Bulk Restore Modal -->
     <div class="modal fade" id="confirmBulkRestoreModal">

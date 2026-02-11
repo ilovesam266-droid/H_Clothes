@@ -241,9 +241,17 @@ const CategoryPage = {
     },
 
     /* ===================== TAB ===================== */
-    switchTab(tab) {
+    switchTab(tab, el) {
         this.state.currentTab = tab;
         this.clearSelection();
+
+        document
+            .querySelectorAll('.nav-tabs-custom .nav-link')
+            .forEach(l => l.classList.remove('active'));
+
+        el.classList.add('active');
+
+        history.replaceState({}, '', location.pathname);
         this.fetchCategories();
     },
 
