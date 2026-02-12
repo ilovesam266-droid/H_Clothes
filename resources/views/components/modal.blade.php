@@ -1,9 +1,9 @@
-@props(['nameModal', 'pageManager', 'event'])
-<div class="modal fade" id="confirmBulkDeleteModal">
+@props(['id', 'nameModal', 'nameBtn', 'pageManager', 'event', 'color'])
+<div class="modal fade" {{ $attributes->merge(['id' => $id])}}>
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-danger">
+                <h5 {{ $attributes->merge(['class' => 'modal-title text-' . $color])}}>
                     <i class="bi bi-exclamation-triangle"></i>
                     {{ $nameModal}}
                 </h5>
@@ -16,8 +16,10 @@
                 <button class="btn btn-light" data-bs-dismiss="modal">
                     Cancel
                 </button>
-                <button class="btn btn-danger" {{ $attributes->merge(['onclick' => $pageManager . '.' . $event])}}onclick="categoryPageApp.confirmBulkDelete()">
-                    Delete
+                <button
+                {{ $attributes->merge(['class' => 'btn btn-' . $color])}}
+                {{ $attributes->merge(['onclick' => $pageManager . '.' . $event])}}>
+                    {{ $nameBtn }}
                 </button>
             </div>
         </div>

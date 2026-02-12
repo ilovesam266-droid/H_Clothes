@@ -6,12 +6,12 @@
     <div class="container-fluid" id="admin-category-page">
         <div class="d-flex justify-content-between mb-2">
             <x-tabs-section>
-                <x-tabs-section.item nameTab='Active Categories' pageManager="categoryPageApp" event="switchTab('active', this)"
-                    spanId="activeCount" :isActive=true></x-tabs-section.item>
+                <x-tabs-section.item nameTab='Active Categories' pageManager="categoryPageApp"
+                    event="switchTab('active', this)" spanId="activeCount" :isActive=true></x-tabs-section.item>
                 <x-tabs-section.item nameTab="Deleted Categories" pageManager="categoryPageApp" event="switchTab('only', this)"
                     spanId="deletedCount"></x-tabs-section.item>
             </x-tabs-section>
-            <button class="btn btn-add text-white" onclick="categoryPageApp.addCategory()">
+            <button class="btn btn-add text-white" onclick="categoryPageApp.openCreateModal()">
                 <i class="bx bx-plus-circle"></i> Add New Category
             </button>
         </div>
@@ -31,9 +31,9 @@
             <div class="card-body p-0">
                 <x-bulk-actions name="Categories selected">
                     <x-button-action btnName="Delete Selected" id="bulkDeleteBtn" pageManager="categoryPageApp"
-                        event="openBulkDeleteModal()" color="danger" />
+                        event="openBulkDeleteModal()" color="danger" icon="bx bx-trash" />
                     <x-button-action btnName="Restore Selected" id="bulkRestoreBtn" pageManager="categoryPageApp"
-                        event="openBulkRestoreModal()" color="success" />
+                        event="openBulkRestoreModal()" color="success" icon="bx bx-undo" />
                     <x-button-action btnName="Clear Selection" pageManager="categoryPageApp" event="clearSelection()"
                         color="secondary" />
                 </x-bulk-actions>
@@ -58,7 +58,8 @@
     </div>
 
     <!-- Bulk Delete Modal -->
-    <x-modal nameModal="Confirm Bulk Delete" pageManager="categoryPageApp" event="confirmBulkDelete()">
+    <x-modal id="confirmBulkDeleteModal" nameModal="Confirm Bulk Delete" pageManager="categoryPageApp"
+        event="confirmBulkDelete()" color="danger" nameBtn="Delete">
         <p>
             Are you sure you want to delete
             <strong id="bulkDeleteCount"></strong> categories?
@@ -69,84 +70,55 @@
     </x-modal>
 
     <!-- Bulk Restore Modal -->
-    <div class="modal fade" id="confirmBulkRestoreModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-success">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        Confirm Bulk Restore
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Are you sure you want to restore
-                        <strong id="bulkRestoreCount"></strong> categories?
-                    </p>
-                    <p class="text-muted mb-0">
-                        This action will make the categories active again.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-success" onclick="categoryPageApp.confirmBulkRestore()">
-                        Restore
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-modal id="confirmBulkRestoreModal" nameModal="Confirm Bulk Restore" pageManager="categoryPageApp"
+        event="confirmBulkRestore()" color="success" nameBtn="Restore">
+        <p>
+            Are you sure you want to restore
+            <strong id="bulkRestoreCount"></strong> categories?
+        </p>
+        <p class="text-muted mb-0">
+            This action will make the categories active again.
+        </p>
+    </x-modal>
 
     <!-- Single Delete Modal -->
-    <div class="modal fade" id="confirmDeleteModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Confirm Delete
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Are you sure you want to delete this category?
-                    </p>
-                    <p class="text-muted mb-0">
-                        This action can be restored later.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-danger" onclick="categoryPageApp.confirmDelete()">
-                        Delete
-                    </button>
-                </div>
+    <x-modal id="confirmDeleteModal" nameModal="Confirm Delete" pageManager="categoryPageApp" event="confirmDelete()"
+        color="danger" nameBtn="Delete">
+        <p>
+            Are you sure you want to delete this category?
+        </p>
+        <p class="text-muted mb-0">
+            This action can be restored later.
+        </p>
+    </x-modal>
+
+    <!-- Edit Modal -->
+    <x-modal id="createCategoryModal" nameModal="Create Category" nameBtn="Save changes" pageManager="categoryPageApp"
+        event="confirmCreateCategory()" color="primary">
+        <form id="createCategoryForm">
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" name="name" id="editCategoryName" required>
             </div>
-        </div>
-    </div>
+        </form>
+    </x-modal>
+
+    <!-- Create Modal -->
+    <x-modal id="editCategoryModal" nameModal="Edit Category" nameBtn="Save changes" pageManager="categoryPageApp"
+        event="confirmEditCategory()" color="primary">
+        <form id="editCategoryForm">
+            <input type="hidden" name="id" id="editCategoryId">
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" name="name" id="editCategoryName" required>
+            </div>
+        </form>
+    </x-modal>
 
     <!-- Sidebar -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="categoryPageApp.closeSidebar()"></div>
-    <div class="category-sidebar" id="categorySidebar">
-        <div class="sidebar-header">
-            <h3 class="text-white"><i class="bx bx-category"></i> Category Details</h3>
-            <button class="btn-close-sidebar" onclick="categoryPageApp.closeSidebar()">
-                <i class="bx bx-menu"></i>
-            </button>
-        </div>
-        <div class="sidebar-body" id="sidebarContent">
-            <!-- Content will be loaded here -->
-        </div>
-        <div class="sidebar-actions" id="sidebarActions">
-            <!-- Actions will be loaded here -->
-        </div>
-    </div>
+    <x-sidebar-item.sidebar-overlay pageManager="categoryPageApp" event="closeSidebar()" />
+    <x-sidebar id="categorySidebar" nameSidebar="Category Details" pageManager="categoryPageApp" event="closeSidebar()" />
 
     <script>
         window.routes = {

@@ -17,32 +17,44 @@ class AuthController extends Controller
         $this->authService = $authService;
     }
 
-    public function loginShow(){
+    public function loginShow()
+    {
         return view('admin.pages.auth.login');
     }
 
-    public function login(LoginRequest $request){
+    public function login(LoginRequest $request)
+    {
         $credentials = $request->validated();
         $attempt = $this->authService->loginService($credentials);
 
         //check user info for login
-        if(Auth::attempt($attempt)){
+        if (Auth::attempt($attempt)) {
             // $request->session()->regenerate();
             $user = Auth::user();
-            $token = $user->createToken('api-token')->plainTextToken;
             // return redirect()->intended(route('admin.dashboard'));
-            return $token;
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+                'redirect' => route('admin.dashboard'),
+                'token' => $user->createToken('api-token')->plainTextToken,
+            ]);
         }
         return back()->withErrors([
             'login_string' => 'Wrong account or password',
         ])->withInput();
     }
 
-    public function registerShow(){
+    public function registerShow()
+    {
         return view('admin.pages.auth.register');
     }
 
-    public function forgotShow(){
+    public function forgotShow()
+    {
         return view('admin.pages.auth.forgot');
     }
 }

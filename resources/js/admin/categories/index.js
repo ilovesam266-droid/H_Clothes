@@ -7,6 +7,7 @@ const CategoryPage = {
         categoryShow: null,
         selected: new Set(),
         deleteId: null,
+        editId: null,
 
         currentTab: 'active',
         search: '',
@@ -152,6 +153,31 @@ const CategoryPage = {
         this.updateBulkBar();
     },
 
+    /* ===================== SIDEBAR ===================== */
+    async openSidebar(id) {
+        if (!id) return;
+
+        try {
+            const { data } = await axios.get(`/api/admin/categories/${id}`);
+            this.state.categoryShow = data.data ?? data;
+            this.renderSidebar(this.state.categoryShow);
+        } catch (e) {
+            console.error('Load category failed', e);
+        }
+    },
+
+    async openEditModal(id) {
+        if (!id) return;
+
+        try {
+            const { data } = await axios.get(`/api/admin/categories/${id}`);
+            this.state.categoryShow = data.data ?? data;
+            this.openModal(this.state.categoryShow);
+        } catch (e) {
+            console.error('Load category failed', e);
+        }
+    },
+
     /* ===================== DELETE / RESTORE ===================== */
     async confirmBulkDelete() {
         try {
@@ -197,6 +223,109 @@ const CategoryPage = {
             console.error(e);
             alert('Delete failed');
         }
+    },
+
+    async confirmEditCategory() {
+        const categoryId = document.getElementById('editCategoryId').value;
+
+        const form = document.getElementById('editCategoryForm');
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch(`/api/admin/categories/${categoryId}/edit`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            // Validation error
+            if (res.status === 422 && data.errors) {
+                Object.entries(data.errors).forEach(([field, messages]) => {
+                    const input = this.form.querySelector(`[name="${field}"]`);
+                    if (!input) return;
+
+                    input.classList.add('is-invalid');
+
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.innerText = messages[0];
+
+                    input.parentNode.appendChild(feedback);
+                });
+                return;
+            }
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Update failed');
+            }
+
+            console.log('SUCCESS', data);
+            const modalEl = document.getElementById('editCategoryModal');
+            bootstrap.Modal.getInstance(modalEl)?.hide();
+
+            this.fetchCategories();
+        } catch (e) {
+            console.error(e);
+            alert('Update failed');
+        }
+    },
+
+    async confirmCreateCategory() {
+        const form = document.getElementById('createCategoryForm');
+        const formData = new FormData(form);
+        // console.log(localStorage.getItem("token"))
+        try {
+            const res = await fetch(`/api/admin/categories/create`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem("auth_token"),
+                    'Accept': 'application/json',
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            // Validation error
+            if (res.status === 422 && data.errors) {
+                Object.entries(data.errors).forEach(([field, messages]) => {
+                    const input = this.form.querySelector(`[name="${field}"]`);
+                    if (!input) return;
+
+                    input.classList.add('is-invalid');
+
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.innerText = messages[0];
+
+                    input.parentNode.appendChild(feedback);
+                });
+                return;
+            }
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Update failed');
+            }
+
+            console.log('SUCCESS', data);
+            const modalEl = document.getElementById('createCategoryModal');
+            bootstrap.Modal.getInstance(modalEl)?.hide();
+
+            this.fetchCategories();
+        } catch (e) {
+            console.error(e);
+            alert('Create failed');
+        }
+    },
+
+    openCreateModal() {
+        const modalEl = document.getElementById('createCategoryModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
     },
 
     openDeleteModal(id) {
@@ -303,10 +432,11 @@ const CategoryPage = {
                         onclick="categoryPageApp.openSidebar(${c.id})">
                         <i class="bx bx-scan"></i>
                     </button>
-                    <a href="${window.routes.categoryEdit}/${c.id}/edit"
-                        class="btn btn-warning btn-action">
+                    <button
+                        class="btn btn-warning btn-action"
+                        onclick="categoryPageApp.openEditModal(${c.id})">
                         <i class="bx bx-edit"></i>
-                    </a>
+                    </button>
                     <button class="btn btn-danger btn-action"
                         onclick="categoryPageApp.openDeleteModal(${c.id})">
                         <i class="bx bx-trash"></i>
@@ -316,6 +446,118 @@ const CategoryPage = {
         });
 
         this.updateSelectAllCheckbox();
+    },
+
+    renderSidebar(category) {
+        const sidebar = document.getElementById('categorySidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const content = document.getElementById('sidebarContent');
+
+        if (!sidebar || !overlay || !content) return;
+
+        const initials = category.name
+            ?.split(' ')
+            .map(w => w[0])
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
+
+        content.innerHTML = `
+
+
+        <div class="info-group">
+            <div class="info-group-title">Category Information</div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-hash"></i> ID
+                </span>
+                <span class="info-value">${category.id}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-tag"></i> Slug
+                </span>
+                <span class="info-value">${category.slug}</span>
+            </div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-group-title">Created By</div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-person"></i> Name
+                </span>
+                <span class="info-value">${category.created_by?.name || 'N/A'}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-envelope"></i> Email
+                </span>
+                <span class="info-value">${category.created_by?.email || 'N/A'}</span>
+            </div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-group-title">Timestamps</div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-clock-history"></i> Created At
+                </span>
+                <span class="info-value">
+                    ${category.created_at?.date || ''} ${category.created_at?.time || ''}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="bi bi-arrow-repeat"></i> Updated At
+                </span>
+                <span class="info-value">
+                    ${category.updated_at?.date || ''} ${category.updated_at?.time || ''}
+                </span>
+            </div>
+
+            ${category.deleted_at
+                ? `
+                    <div class="info-row">
+                        <span class="info-label text-danger">
+                            <i class="bi bi-trash"></i> Deleted At
+                        </span>
+                        <span class="info-value text-danger">
+                            ${category.deleted_at}
+                        </span>
+                    </div>
+                `
+                : ''
+            }
+        </div>
+    `;
+
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+    },
+
+    closeSidebar() {
+        const sidebar = document.getElementById('categorySidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        sidebar?.classList.remove('show');
+        overlay?.classList.remove('show');
+    },
+
+    openModal(category) {
+        const modalEl = document.getElementById('editCategoryModal');
+        const modal = new bootstrap.Modal(modalEl);
+
+        document.getElementById('editCategoryId').value = category.id;
+        document.getElementById('editCategoryName').value = category.name;
+
+        modal.show();
     },
 
     renderPagination() {
