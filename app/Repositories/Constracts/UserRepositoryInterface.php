@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Constracts;
 
+use App\Repositories\Constracts\BaseRepositoryInterface;
+
 interface UserRepositoryInterface extends BaseRepositoryInterface
 {
     public function getAll($request);

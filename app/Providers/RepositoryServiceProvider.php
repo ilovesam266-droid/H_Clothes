@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Repositories\Constracts\AddressRepositoryInterface;
 use App\Repositories\Constracts\CategoryRepositoryInterface;
+use App\Repositories\Constracts\ImageRepositoryInterface;
 use App\Repositories\Constracts\ProductRepositoryInterface;
 use App\Repositories\Constracts\UserRepositoryInterface;
 use App\Repositories\Eloquents\AddressRepository;
 use App\Repositories\Eloquents\CategoryRepository;
+use App\Repositories\Eloquents\ImageRepository;
 use App\Repositories\Eloquents\ProductRepository;
 use App\Repositories\Eloquents\UserRepository;
 use Illuminate\Support\ServiceProvider;
@@ -19,6 +21,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AddressRepositoryInterface::class => AddressRepository::class,
         ProductRepositoryInterface::class => ProductRepository::class,
         CategoryRepositoryInterface::class => CategoryRepository::class,
+        ImageRepositoryInterface::class => ImageRepository::class,
     ];
 
     /**

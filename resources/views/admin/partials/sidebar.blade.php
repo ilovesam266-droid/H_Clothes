@@ -82,6 +82,19 @@
             </a>
         </li>
 
+        <li class="menu-item">
+            <a href="{{ route('admin.images') }}" class="menu-link">
+                <i class="bx bx-user"></i>
+                <div data-i18n="Layouts">Image</div>
+            </a>
+        </li>
+
+        <li class="menu-item">
+            <a href="{{ route('admin.users') }}" class="menu-link">
+                <i class="bx bx-user"></i>
+                <div data-i18n="Layouts">User</div>
+            </a>
+        </li>
 
     </ul>
 </aside>

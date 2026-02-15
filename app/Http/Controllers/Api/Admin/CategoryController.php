@@ -84,11 +84,11 @@ class CategoryController extends Controller
     {
         $ids = $request->all();
 
-        $users = $categoryService->restoreCategory($ids);
+        $categories = $categoryService->restoreCategory($ids);
 
         return response()->json([
             'message' => 'Restored succesfully',
-            'restored_count' => $users,
+            'restored_count' => $categories,
         ]);
     }
 }

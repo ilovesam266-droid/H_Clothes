@@ -11,4 +11,7 @@ class ProductController extends Controller
         return view('admin.pages.products.index');
     }
 
+    public function create(){
+        return view('admin.pages.products.create');
+    }
 }

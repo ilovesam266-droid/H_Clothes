@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ImageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,9 @@ Route::prefix('/admin')->name('admin.')->group(function(){
     Route::get('/users/{id}/edit', [AdminUserController::class,'edit'])->name('user-edit');
 
     Route::get('/products', [ProductController::class,'index'])->name('products');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products-create');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+
+    Route::get('/images', [ImageController::class, 'index'])->name('images');
 })->middleware('auth:sanctum');
