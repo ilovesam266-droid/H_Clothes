@@ -1,6 +1,7 @@
 import Pagination from "../pagination.js";
+import imagePicker from "../images/image-picker.js";
 
-const ImagePage = {
+export const ImagePage = {
     /* ===================== STATE ===================== */
     state: {
         images: [],
@@ -157,7 +158,7 @@ const ImagePage = {
 
         this.renderTable();
         this.renderPagination();
-        this.updateBulkBar();
+        // this.updateBulkBar();
 
         this.state.loading = false;
     },
@@ -369,6 +370,69 @@ const ImagePage = {
         }
     },
 
+    async confirmUploadImages() {
+        const form = document.getElementById('uploadImageForm');
+        const formData = new FormData(form);
+        const fileInput = document.getElementById('imageFile');
+        const files = fileInput.files;
+
+        if (files.length === 0) {
+            alert('Please select at least one image');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const modalEl = document.getElementById('uploadImageModal');
+            const uploadBtn = modalEl.querySelector('[onclick*="confirmUploadImages"]');
+            const originalText = uploadBtn.textContent;
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+
+            const res = await fetch(`/api/admin/images/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem("auth_token"),
+                    'Accept': 'application/json',
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Upload failed');
+            }
+
+            console.log('SUCCESS', data);
+
+            // Show success message
+            const successMsg = data.uploaded_count
+                ? `Successfully uploaded ${data.uploaded_count} image(s)`
+                : 'Images uploaded successfully';
+
+            alert(successMsg);
+
+            bootstrap.Modal.getInstance(modalEl)?.hide();
+
+            imagePicker.fetchImages();
+
+            // Reset button state
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = originalText;
+        } catch (e) {
+            console.error(e);
+            alert('Upload failed: ' + e.message);
+
+            // Reset button state
+            const modalEl = document.getElementById('uploadImageModal');
+            const uploadBtn = modalEl.querySelector('[onclick*="confirmUploadImages"]');
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload All';
+        }
+    },
+
     /* ===================== DELETE / RESTORE ===================== */
     async confirmBulkDelete() {
         try {
@@ -488,6 +552,11 @@ const ImagePage = {
     /* ===================== RENDER ===================== */
     renderTable() {
         const tbody = this.dom.tbody;
+        if (!tbody) {
+            console.debug("No #imageTable found, skip rendering");
+            return;
+        }
+
         tbody.innerHTML = '';
 
         if (!this.state.images.length) {
@@ -672,7 +741,7 @@ const ImagePage = {
                 </div>
 
                 ${image.deleted_at
-                    ? `
+                ? `
                         <div class="info-row">
                             <span class="info-label text-danger">
                                 <i class="bi bi-trash"></i> Deleted At
@@ -682,8 +751,8 @@ const ImagePage = {
                             </span>
                         </div>
                     `
-                    : ''
-                }
+                : ''
+            }
             </div>
         `;
 
@@ -700,6 +769,10 @@ const ImagePage = {
     },
 
     renderPagination() {
+        if(!this.dom.pagination){
+            console.debug("No #imageTable found, skip rendering");
+            return;
+        }
         this.pagination = new Pagination(this.dom.pagination, (url) => this.goPage(url));
         this.pagination.render(this.state.pagination);
     },
@@ -734,3 +807,4 @@ const ImagePage = {
 
 window.imagePageApp = ImagePage;
 document.addEventListener('DOMContentLoaded', () => ImagePage.init());
+

@@ -88,7 +88,10 @@ const ProductPage = {
         });
 
         this.state.products = response.data.data;
+        this.state.pagination = response.data.meta;
+
         this.renderProducts();
+        this.renderPagination();
         this.state.loading = false;
     },
 
@@ -119,6 +122,10 @@ const ProductPage = {
                 <td>${(this.state.currentPage - 1) * this.state.perPage + index + 1}</td>
                 <td>
                     <div class="d-flex align-items-center">
+                        <img src="${product.images?.length ? '/' + product.images[0].url : '/images/placeholder.png'}"
+                            class="product-thumb me-2"
+                            alt="${product.name}">
+
                         <div>
                             <div class="fw-bold">${product.name}</div>
                             <small class="text-muted">${product.slug}</small>
@@ -407,7 +414,7 @@ const ProductPage = {
                     this.setQuery('ProductDashboard', page);
 
                     // fetch lại data
-                    this.fetchUsers();
+                    this.fetchProducts();
                 });
             }
 

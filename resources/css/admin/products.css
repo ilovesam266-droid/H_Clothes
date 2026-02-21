@@ -399,7 +399,6 @@
 }
 
 .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-color: #667eea;
     color: white;
 }
@@ -504,4 +503,69 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+#imagePreview {
+    gap: 12px;
+}
+
+.preview-item {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: grab;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
+    transition: 0.2s ease;
+}
+
+.preview-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+.preview-item:active {
+    cursor: grabbing;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item button {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.preview-item button:hover {
+    background: rgba(220,53,69,0.9);
+}
+
+/* Drop zone highlight */
+.drop-zone.dragover {
+    border-color: #0d6efd;
+    background: rgba(13,110,253,0.05);
+}
+
+
+.product-thumb {
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    background: #f8f9fa;
 }

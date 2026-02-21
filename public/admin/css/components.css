@@ -200,3 +200,78 @@ tbody tr:hover {
 .sidebar-body {
     padding: 25px;
 }
+
+/* =========================
+   Image Picker
+========================= */
+
+.preview-item {
+    position: relative;
+    display: inline-block;
+    margin: 8px;
+    cursor: grab;
+}
+
+.preview-item img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.preview-item button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+.image-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 120px);
+    gap: 10px;
+}
+
+.image-picker-item {
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.image-picker-item.selected {
+    border-color: #0d6efd;
+}
+
+.image-picker-item img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+}
+
+
+.form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    margin: 20;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-header h2 {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: #999;
+    font-size: 14px;
+}

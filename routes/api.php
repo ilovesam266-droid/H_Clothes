@@ -22,6 +22,7 @@ Route::prefix('/admin')->name('api.admin.')->group(function () {
     Route::get('/products', [ProductController::class, 'index'])->name('products');
     Route::post('/products', [ProductController::class, 'destroy'])->name('products-del');
     Route::patch('/products/restore', [ProductController::class, 'restore'])->name('products-restore');
+    Route::post('/products/create', [ProductController::class, 'store'])->name('products-store');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
     Route::post('/categories', [CategoryController::class, 'destroy'])->name('categories-del');

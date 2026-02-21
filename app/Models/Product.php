@@ -40,7 +40,9 @@ class Product extends Model
 
     public function images()
     {
-        return $this->morphToMany(Image::class, 'imageable');
+        return $this->morphToMany(Image::class, 'imageable')
+            ->withPivot('position')
+            ->withTimestamps();
     }
 
     public function categories()

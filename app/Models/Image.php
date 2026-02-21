@@ -24,6 +24,8 @@ class Image extends Model
 
     public function products()
     {
-        return $this->morphedByMany(Product::class, 'imageable');
+        return $this->morphedByMany(Product::class, 'imageable')
+            ->withPivot('position')
+            ->withTimestamps();
     }
 }

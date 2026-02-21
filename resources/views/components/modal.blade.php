@@ -1,6 +1,6 @@
-@props(['id', 'nameModal', 'nameBtn', 'pageManager', 'event', 'color'])
+@props(['id', 'nameModal', 'nameBtn', 'pageManager', 'event', 'color', 'class'=>'modal-dialog-centered'])
 <div class="modal fade" {{ $attributes->merge(['id' => $id])}}>
-    <div class="modal-dialog modal-dialog-centered">
+    <div {{ $attributes->merge(['class' => 'modal-dialog ' . $class])}}>
         <div class="modal-content">
             <div class="modal-header">
                 <h5 {{ $attributes->merge(['class' => 'modal-title text-' . $color])}}>

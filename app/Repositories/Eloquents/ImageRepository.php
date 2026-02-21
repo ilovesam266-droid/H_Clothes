@@ -32,7 +32,7 @@ class ImageRepository extends BaseRepository implements ImageRepositoryInterface
                     }
                 );
             },
-            perPage: $request->perPage ?? 10,
+            perPage: $request->perPage ?? 30,
             columns: ['*'],
             pageName: 'ImageDashboard');
     }

@@ -25,6 +25,14 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
                     $q->select('id', 'first_name', 'last_name', 'email');
                 });
 
+                $query->with(['images' => function ($q) {
+                    $q->select('images.id', 'images.url')->withPivot('position');
+                }]);
+
+                $query->with(['categories' => function ($q) {
+                    $q->select('categories.id', 'categories.name', 'categories.slug');
+                }]);
+
                 $query->when(
                     $request->trashed ?? null,
                     function ($q, $trashed) {
@@ -50,7 +58,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
             },
             perPage: $request->perPage ?? 20,
             columns: ['*'],
-            pageName: 'Products'
+            pageName: 'ProductDashboard'
         );
     }
 

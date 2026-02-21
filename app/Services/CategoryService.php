@@ -2,11 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\Category\Resource;
 use App\Repositories\Eloquents\CategoryRepository;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 
 class CategoryService

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
 use App\Http\Resources\Product\Resource;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
@@ -22,9 +23,13 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request, ProductService $productService)
     {
-        //
+        // dd($request->all());
+        $user = $request->user('sanctum')->id;
+        $product = $productService->createProduct($request, $user);
+
+        return new Resource($product);
     }
 
     /**

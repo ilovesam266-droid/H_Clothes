@@ -102,6 +102,18 @@ const CategoryPage = {
         this.state.loading = false;
     },
 
+    async loadCategories(params = {}) {
+        const res = await axios.get('/api/admin/categories', {
+            params: {
+                trashed: 'active',
+                perPage: 1000,
+                ...params
+            }
+        });
+
+        return res.data.data;
+    },
+
     /* ===================== SELECT ===================== */
     toggleSelectAll() {
         const checked = this.dom.selectAll.checked;
@@ -561,7 +573,6 @@ const CategoryPage = {
     },
 
     renderPagination() {
-        console.log(this.dom.pagination);
         this.pagination = new Pagination(this.dom.pagination, (url) => this.goPage(url));
         this.pagination.render(this.state.pagination);
     },

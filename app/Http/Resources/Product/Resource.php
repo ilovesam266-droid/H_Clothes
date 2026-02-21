@@ -37,7 +37,24 @@ class Resource extends JsonResource
             'creator' => [
                 'name' => $this->creator?->full_name,
                 'email' => $this->creator?->email,
-            ], // Aggregated info từ variants
+            ],
+
+            'images' => $this->images->map(function ($image) {
+                return [
+                    'name'       => $image->name,
+                    'url'        => $image->url,
+                    'position' => $image->pivot->position ?? 0,
+                ];
+            }),
+
+            'categories' => $this->categories->map(function ($category) {
+                return [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                ];
+            }),
+
+            // Aggregated info từ variants
             'total_variants' => $this->variants->count(),
             'total_stock' => $this->variants->sum('stock'),
             'total_sold' => $this->variants->sum('sold'),
