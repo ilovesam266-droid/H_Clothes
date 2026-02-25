@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Helpers\Repository;
 use App\Repositories\Constracts\ProductRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -10,6 +9,7 @@ use Illuminate\Support\Str;
 class ProductService
 {
     protected $productRepo;
+
     public function __construct(ProductRepositoryInterface $product)
     {
         $this->productRepo = $product;
@@ -23,7 +23,7 @@ class ProductService
                 'name',
                 'status',
                 'description',
-                'detail'
+                'detail',
             ]);
 
             $productData['slug'] = Str::slug($productData['name']);
@@ -31,25 +31,25 @@ class ProductService
 
             $product = $this->productRepo->create($productData);
 
-            if (!$product) {
+            if (! $product) {
                 throw new \Exception('Create product failed');
             }
 
             $categories = $data->input('categories', []);
 
-            if (!empty($categories)) {
+            if (! empty($categories)) {
                 $product->categories()->sync($categories);
             }
 
             $images = $data->input('images', []);
 
-            if (!empty($images)) {
+            if (! empty($images)) {
 
                 $pivotData = [];
 
                 foreach ($images as $position => $imageId) {
                     $pivotData[$imageId] = [
-                        'position' => $position
+                        'position' => $position,
                     ];
                 }
 
@@ -58,6 +58,50 @@ class ProductService
 
             return $product;
         });
+    }
+
+    public function showProduct(int $id)
+    {
+        $product = $this->productRepo->find($id);
+
+        return $product;
+    }
+
+    public function updateProduct(int $id, $data)
+    {
+        $data['slug'] = Str::slug($data['name']);
+
+        $product = $this->productRepo->update($id, $data);
+
+        return $product;
+    }
+
+    public function updateCategorieImage(int $id, $data)
+    {
+        $product = $this->productRepo->find($id);
+
+        $categories = $data->input('categories', []);
+
+        if (! empty($categories)) {
+            $product->categories()->sync($categories);
+        }
+
+        $images = $data->input('images', []);
+
+        if (! empty($images)) {
+
+            $pivotData = [];
+
+            foreach ($images as $position => $imageId) {
+                $pivotData[$imageId] = [
+                    'position' => $position,
+                ];
+            }
+
+            $product->images()->sync($pivotData);
+        }
+
+        return $product;
     }
 
     public function getAllProduct($request)

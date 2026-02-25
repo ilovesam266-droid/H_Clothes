@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -25,27 +24,47 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
-        $attempt = $this->authService->loginService($credentials);
+        $remember = $request->boolean('remember');
 
-        //check user info for login
-        if (Auth::attempt($attempt)) {
-            // $request->session()->regenerate();
-            $user = Auth::user();
-            // return redirect()->intended(route('admin.dashboard'));
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
-                'redirect' => route('admin.dashboard'),
-                'token' => $user->createToken('api-token')->plainTextToken,
-            ]);
+        $user = $this->authService->loginService($credentials, $remember);
+
+        if ($user) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                    ],
+                    'token' => $user->createToken('api-token')->plainTextToken,
+                ]);
+            }
+
+            return redirect()->intended(route('admin.dashboard'));
         }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Wrong account or password',
+            ], 422);
+        }
+
         return back()->withErrors([
             'login_string' => 'Wrong account or password',
         ])->withInput();
+    }
+
+    public function logout(Request $request)
+    {
+        $this->authService->logoutService();
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Logged out successfully']);
+        }
+
+        return redirect(route('admin.loginShow'))->with('info', 'You are logged out');
     }
 
     public function registerShow()

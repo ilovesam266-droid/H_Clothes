@@ -35,17 +35,30 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(int $id, ProductService $productService)
     {
-        //
+        $product = $productService->showProduct($id);
+
+        return new Resource($product);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(int $id, ProductRequest $request, ProductService $productService)
     {
-        //
+        $data = $request->validated();
+
+        $product = $productService->updateProduct($id, $data);
+
+        return new Resource($product);
+    }
+
+    public function updateCategorieImage(int $id, Request $request, ProductService $productService)
+    {
+        $product = $productService->updateCategorieImage($id, $request);
+
+        return new Resource($product);
     }
 
     /**
