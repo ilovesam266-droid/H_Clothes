@@ -25,7 +25,6 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request, ProductService $productService)
     {
-        // dd($request->all());
         $user = $request->user('sanctum')->id;
         $product = $productService->createProduct($request, $user);
 
@@ -47,9 +46,7 @@ class ProductController extends Controller
      */
     public function update(int $id, ProductRequest $request, ProductService $productService)
     {
-        $data = $request->validated();
-
-        $product = $productService->updateProduct($id, $data);
+        $product = $productService->updateProduct($id, $request);
 
         return new Resource($product);
     }
@@ -85,6 +82,18 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Restored succesfully',
             'restored_count' => $products,
+        ]);
+    }
+
+    public function forceDelete(Request $request, ProductService $productService)
+    {
+        $ids = $request->all();
+
+        $products = $productService->forceDeleteProduct($ids);
+
+        return response()->json([
+            'message' => 'Permanently deleted succesfully',
+            'deleted_count' => $products,
         ]);
     }
 }

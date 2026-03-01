@@ -67,41 +67,38 @@ class ProductService
         return $product;
     }
 
-    public function updateProduct(int $id, $data)
+    public function updateProduct(int $id, $data): mixed
     {
-        $data['slug'] = Str::slug($data['name']);
+        return DB::transaction(function () use ($id, $data) {
+            $productData = $data->only([
+                'name',
+                'status',
+                'description',
+                'detail',
+            ]);
 
-        $product = $this->productRepo->update($id, $data);
+            $productData['slug'] = Str::slug($productData['name']);
 
-        return $product;
-    }
+            $product = $this->productRepo->update($id, $productData);
 
-    public function updateCategorieImage(int $id, $data)
-    {
-        $product = $this->productRepo->find($id);
+            if (! $product) {
+                throw new \Exception('Update product failed');
+            }
 
-        $categories = $data->input('categories', []);
-
-        if (! empty($categories)) {
+            $categories = $data->input('categories', []);
             $product->categories()->sync($categories);
-        }
 
-        $images = $data->input('images', []);
-
-        if (! empty($images)) {
+            $images = $data->input('images', []);
 
             $pivotData = [];
-
             foreach ($images as $position => $imageId) {
-                $pivotData[$imageId] = [
-                    'position' => $position,
-                ];
+                $pivotData[$imageId] = ['position' => $position];
             }
 
             $product->images()->sync($pivotData);
-        }
 
-        return $product;
+            return $product->fresh(['categories', 'images', 'variants', 'creator']);
+        });
     }
 
     public function getAllProduct($request)
@@ -119,5 +116,10 @@ class ProductService
     public function restoreProduct($idOrCriteria)
     {
         return $this->productRepo->restoreProduct($idOrCriteria);
+    }
+
+    public function forceDeleteProduct($idOrCriteria)
+    {
+        return $this->productRepo->forceDeleteProduct($idOrCriteria);
     }
 }

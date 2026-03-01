@@ -1,149 +1,3 @@
-// import Pagination from "../pagination.js";
-
-// const CategoryPicker = {
-
-//     state: {
-//         categories: [],
-//         selected: new Set(),
-
-//         pagination: {},
-//         currentPage: 1,
-//         perPage: 10,
-//     },
-
-//     dom: {},
-
-//     init(config = {}) {
-
-//         this.dom = {
-//             modal: document.getElementById(config.modalId ?? 'categoryModal'),
-//             list: document.getElementById(config.listId ?? 'categoryList'),
-//             loading: document.getElementById(config.loadingId ?? 'categoryLoading'),
-//             pagination: document.getElementById(config.paginationId ?? 'categoryPagination'),
-//             container: document.getElementById(config.containerId ?? 'categoriesContainer'),
-//             input: document.getElementById(config.inputId ?? 'categoryIds')
-//         };
-
-//         this.modalInstance = new bootstrap.Modal(this.dom.modal);
-//     },
-
-//     async open() {
-//         await this.fetchCategories();
-//         this.modalInstance.show();
-//     },
-
-//     async fetchCategories(page = this.state.currentPage) {
-
-//         try {
-//             this.dom.loading?.classList.remove('d-none');
-
-//             const res = await axios.get('/api/admin/categories', {
-//                 params: {
-//                     page,
-//                     perPage: this.state.perPage
-//                 }
-//             });
-
-//             this.state.categories = res.data.data;
-//             this.state.pagination = res.data.meta;
-//             this.state.currentPage = page;
-
-//             this.renderList();
-//             this.renderPagination();
-
-//         } catch (e) {
-//             console.error(e);
-//             alert('Cannot load categories');
-//         } finally {
-//             this.dom.loading?.classList.add('d-none');
-//         }
-//     },
-
-//     renderList() {
-//         if (!this.dom.list) return;
-
-//         this.dom.list.innerHTML = '';
-
-//         this.state.categories.forEach(cat => {
-
-//             const item = document.createElement('label');
-//             item.className = 'list-group-item d-flex align-items-center gap-2';
-
-//             const checkbox = document.createElement('input');
-//             checkbox.type = 'checkbox';
-//             checkbox.className = 'form-check-input';
-//             checkbox.checked = this.state.selected.has(cat.id);
-
-//             checkbox.onchange = () => this.toggle(cat.id);
-
-//             const text = document.createElement('span');
-//             text.textContent = cat.name;
-
-//             item.appendChild(checkbox);
-//             item.appendChild(text);
-
-//             this.dom.list.appendChild(item);
-//         });
-//     },
-
-//     renderPagination() {
-//         if (!this.dom.pagination) return;
-
-//         this.paginationInstance = new Pagination(
-//             this.dom.pagination,
-//             (url) => this.goPage(url)
-//         );
-
-//         this.paginationInstance.render(this.state.pagination);
-//     },
-
-//     goPage(url) {
-//         const page = new URL(url).searchParams.get('page');
-//         if (!page) return;
-
-//         this.fetchCategories(page);
-//     },
-
-//     toggle(id) {
-//         this.state.selected.has(id)
-//             ? this.state.selected.delete(id)
-//             : this.state.selected.add(id);
-//     },
-
-//     confirm() {
-//         this.renderBadges();
-//         this.updateInput();
-//     },
-
-//     renderBadges() {
-//         if (!this.dom.container) return;
-
-//         if (!this.state.selected.size) {
-//             this.dom.container.innerHTML =
-//                 `<span class="text-muted">Click để chọn category</span>`;
-//             return;
-//         }
-
-//         const badges = [...this.state.selected]
-//             .map(id => {
-//                 const cat = this.state.categories.find(c => c.id === id);
-//                 return cat
-//                     ? `<span class="badge bg-primary me-1">${cat.name}</span>`
-//                     : '';
-//             })
-//             .join('');
-
-//         this.dom.container.innerHTML = badges;
-//     },
-
-//     updateInput() {
-//         if (!this.dom.input) return;
-//         this.dom.input.value = [...this.state.selected];
-//     }
-// };
-
-// export default CategoryPicker;
-
 import Pagination from "../pagination.js";
 
 const CategoryPicker = {
@@ -213,6 +67,10 @@ const CategoryPicker = {
                 params: {
                     page,
                     perPage: this.state.perPage
+                },
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                 }
             });
 
@@ -318,7 +176,17 @@ const CategoryPicker = {
 
     updateInput() {
         if (!this.dom.input) return;
-        this.dom.input.value = [...this.state.selected];
+
+        this.dom.input.innerHTML = '';
+        // this.dom.input.value = [...this.state.selected];
+        this.state.selected.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'categories[]';
+            input.value = id;
+
+            this.dom.input.appendChild(input);
+        });
     }
 };
 

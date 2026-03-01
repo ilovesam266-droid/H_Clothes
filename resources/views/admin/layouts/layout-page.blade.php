@@ -80,6 +80,8 @@
         @include('admin.partials.footer')
     </div>
 
+    <x-toast id="adminToast" />
+
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->

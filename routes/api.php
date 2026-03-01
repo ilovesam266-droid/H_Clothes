@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\AddressController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\ImageController;
+use App\Http\Controllers\Api\Admin\OrderController as AdminOrderApiController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\VariantController;
@@ -21,16 +22,20 @@ Route::prefix('/admin')->name('api.admin.')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::post('/users', [UserController::class, 'destroy'])->name('users-del');
         Route::patch('/users/restore', [UserController::class, 'restore'])->name('user-restore');
+        Route::delete('/users/force-delete', [UserController::class, 'forceDelete'])->name('user-force-delete');
         Route::get('/users/{id}', [UserController::class, 'show'])->name('user-show');
         Route::post('/users/create', [UserController::class, 'store'])->name('user-create');
         Route::post('/users/{id}/edit', [UserController::class, 'update'])->name('user-edit');
         Route::delete('/users/{id}/delete', [UserController::class, 'delete'])->name('user-del');
 
+        Route::get('/products/counts', [ProductController::class, 'counts'])->name('products-counts');
         Route::get('/products', [ProductController::class, 'index'])->name('products');
         Route::post('/products', [ProductController::class, 'destroy'])->name('products-del');
         Route::patch('/products/restore', [ProductController::class, 'restore'])->name('products-restore');
+        Route::delete('/products/force-delete', [ProductController::class, 'forceDelete'])->name('products-force-delete');
         Route::post('/products/create', [ProductController::class, 'store'])->name('products-store');
         Route::get('/products/{id}', [ProductController::class, 'show'])->name('product-show');
+        Route::post('/products/{id}/edit', [ProductController::class, 'update'])->name('product-edit');
 
         Route::post('/products/{id}/variants/create', [VariantController::class, 'store'])->name('variant-create');
         Route::put('/variants/{idV}/edit', [VariantController::class, 'update'])->name('variant-edit');
@@ -55,6 +60,10 @@ Route::prefix('/admin')->name('api.admin.')->group(function () {
         Route::post('/images', [ImageController::class, 'destroy'])->name('images-del');
         Route::patch('/images', [ImageController::class, 'restore'])->name('images-restore');
         Route::post('/images/upload', [ImageController::class, 'store'])->name('images-upload');
+
+        Route::get('/orders', [AdminOrderApiController::class, 'index'])->name('orders');
+        Route::get('/orders/{id}', [AdminOrderApiController::class, 'show'])->name('order-show');
+        Route::patch('/orders/{id}/status', [AdminOrderApiController::class, 'updateStatus'])->name('order-status');
     });
 });
 

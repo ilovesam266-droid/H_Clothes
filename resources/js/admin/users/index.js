@@ -5,6 +5,8 @@ const UserPage = {
         userShow: null,
         deletedUsers: [],
         idUserDelete: null,
+        idUserRestore: null,
+        idUserForceDelete: null,
 
         currentTab: 'active',
         userStatus: '',
@@ -88,27 +90,36 @@ const UserPage = {
     async fetchUsers() {
         this.state.loading = true;
 
-        const response = await axios.get('/api/admin/users', {
-            params: {
-                trashed: this.state.currentTab,
-                search: this.state.search,
-                perPage: this.state.perPage,
-                filters: {
-                    status: this.state.userStatus,
-                    role: this.state.userRole,
-                    verified: this.state.userVerified,
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await axios.get('/api/admin/users', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 },
-                ...this.getQueryParams(),
-            }
-        });
+                params: {
+                    trashed: this.state.currentTab,
+                    search: this.state.search,
+                    perPage: this.state.perPage,
+                    filters: {
+                        status: this.state.userStatus,
+                        role: this.state.userRole,
+                        verified: this.state.userVerified,
+                    },
+                    ...this.getQueryParams(),
+                }
+            });
 
-        this.state.users = response.data.data;
-        this.state.pagination = response.data.meta;
+            this.state.users = response.data.data;
+            this.state.pagination = response.data.meta;
 
-        this.renderTable();
-        this.renderPagination();
-
-        this.state.loading = false;
+            this.renderTable();
+            this.renderPagination();
+        } catch (e) {
+            console.error('Fetch users failed', e);
+            Toast.error('Failed to load users');
+        } finally {
+            this.state.loading = false;
+        }
     },
 
     /* ===================== BULK ACTION ===================== */
@@ -160,7 +171,12 @@ const UserPage = {
         if (!id) return;
 
         try {
-            const { data } = await axios.get(`/api/admin/users/${id}`);
+            const { data } = await axios.get(`/api/admin/users/${id}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                },
+            });
             this.state.userShow = data.data ?? data;
             this.renderSidebar(this.state.userShow);
         } catch (e) {
@@ -175,17 +191,25 @@ const UserPage = {
                 document.getElementById('confirmBulkDeleteModal')
             )?.hide();
 
+            Toast.processing('Deleting users...');
             await axios.post(
                 '/api/admin/users',
-                Array.from(this.state.selectedUser)
+                Array.from(this.state.selectedUser),
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    },
+                }
             );
 
             this.state.selectedUser.clear();
             this.updateBulkActionBar();
             this.fetchUsers();
+            Toast.success('Users deleted successfully');
         } catch (e) {
             console.error(e);
-            alert('Bulk delete failed');
+            Toast.error('Bulk delete failed');
         }
     },
 
@@ -195,17 +219,25 @@ const UserPage = {
                 document.getElementById('confirmBulkRestoreModal')
             )?.hide();
 
+            Toast.processing('Restoring users...');
             await axios.patch(
                 '/api/admin/users/restore',
-                Array.from(this.state.selectedUser)
+                Array.from(this.state.selectedUser),
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    },
+                }
             );
 
             this.state.selectedUser.clear();
             this.updateBulkActionBar();
             this.fetchUsers();
+            Toast.success('Users restored successfully');
         } catch (e) {
             console.error(e);
-            alert('Bulk restore failed');
+            Toast.error('Bulk restore failed');
         }
     },
 
@@ -215,15 +247,77 @@ const UserPage = {
                 document.getElementById('confirmDeleteModal')
             )?.hide();
 
+            Toast.processing('Deleting user...');
             await axios.delete(
-                `/api/admin/users/${this.state.idUserDelete}/delete`
+                `/api/admin/users/${this.state.idUserDelete}/delete`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    },
+                }
             );
 
             this.state.idUserDelete = null;
             this.fetchUsers();
+            Toast.success('User deleted successfully');
         } catch (e) {
             console.error(e);
-            alert('Delete failed');
+            Toast.error('Delete failed');
+        }
+    },
+
+    async confirmRestore() {
+        try {
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmRestoreModal')
+            )?.hide();
+
+            Toast.processing('Restoring user...');
+            await axios.patch(
+                '/api/admin/users/restore',
+                [this.state.idUserRestore],
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    },
+                }
+            );
+
+            this.state.idUserRestore = null;
+            this.fetchUsers();
+            Toast.success('User restored successfully');
+        } catch (e) {
+            console.error(e);
+            Toast.error('Restore failed');
+        }
+    },
+
+    async confirmForceDelete() {
+        try {
+            bootstrap.Modal.getInstance(
+                document.getElementById('confirmForceDeleteModal')
+            )?.hide();
+
+            Toast.processing('Permanently deleting user...');
+            await axios.delete(
+                '/api/admin/users/force-delete',
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    },
+                    data: [this.state.idUserForceDelete]
+                }
+            );
+
+            this.state.idUserForceDelete = null;
+            this.fetchUsers();
+            Toast.success('User permanently deleted');
+        } catch (e) {
+            console.error(e);
+            Toast.error('Force delete failed');
         }
     },
 
@@ -231,6 +325,20 @@ const UserPage = {
         this.state.idUserDelete = id;
         new bootstrap.Modal(
             document.getElementById('confirmDeleteModal')
+        ).show();
+    },
+
+    openRestoreModal(id) {
+        this.state.idUserRestore = id;
+        new bootstrap.Modal(
+            document.getElementById('confirmRestoreModal')
+        ).show();
+    },
+
+    openForceDeleteModal(id) {
+        this.state.idUserForceDelete = id;
+        new bootstrap.Modal(
+            document.getElementById('confirmForceDeleteModal')
         ).show();
     },
 
@@ -350,17 +458,41 @@ const UserPage = {
                         <span class="text-nowrap">${user.updated_at.date}</span>
                         <small class="text-muted d-block">${user.updated_at.time}</small>
                     </td>
-                    <td class="text-nowrap text-center">
-                        <button class="btn btn-info btn-action" onclick="userPageApp.openUserSidebar(${user.id})" title="View Details">
-                                    <i class='bx bx-scan'></i>
-                                </button>
-                                <a href="${window.routes.userEdit}/${user.id}/edit" class="btn btn-warning btn-action">
-                                    <i class="bx bx-edit"></i>
-                                </a>
-                                <button class="btn btn-danger btn-action" onclick="userPageApp.openDeleteModal(${user.id})" title="Delete">
-                                    <i class="bx bx-trash"></i>
-                                </button>
-                            </td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                        ${this.state.currentTab === 'active' ? `
+                            <button class="btn btn-info"
+                                    onclick="userPageApp.openUserSidebar(${user.id})"
+                                    title="View Details">
+                                <i class='bx bx-scan'></i>
+                            </button>
+
+                            <button class="btn btn-warning"
+                                    onclick="window.location.href='${window.routes.userEdit}/${user.id}/edit'"
+                                    title="Edit">
+                                <i class="bx bx-edit"></i>
+                            </button>
+
+                            <button class="btn btn-danger"
+                                    onclick="userPageApp.openDeleteModal(${user.id})"
+                                    title="Delete">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        ` : `
+                            <button class="btn btn-success"
+                                    onclick="userPageApp.openRestoreModal(${user.id})"
+                                    title="Restore">
+                                <i class="bx bx-undo"></i>
+                            </button>
+                            <button class="btn btn-danger"
+                                    onclick="userPageApp.openForceDeleteModal(${user.id})"
+                                    title="Delete Permanently">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        `}
+                        </div>
+                    </td>
+
                 </tr>
             `;
         });

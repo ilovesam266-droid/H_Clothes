@@ -51,18 +51,20 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             },
             perPage: $request->perPage ?? 15,
             columns: ['*'],
-            pageName: "UserDashboard"
+            pageName: 'UserDashboard'
         );
     }
 
-    public function getUserById($idOrCriteria){
+    public function getUserById($idOrCriteria)
+    {
         return $this->find($idOrCriteria);
     }
 
     public function deleteUser($idOrCriteria)
     {
-        if (!is_array($idOrCriteria))
-            { $idOrCriteria = [$idOrCriteria]; }
+        if (! is_array($idOrCriteria)) {
+            $idOrCriteria = [$idOrCriteria];
+        }
 
         $criteria = ['whereIn' => Repository::wrapVlue('id', $idOrCriteria)];
 
@@ -74,5 +76,16 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $criteria = ['whereIn' => Repository::wrapVlue('id', $idOrCriteria)];
 
         return $this->restore($criteria);
+    }
+
+    public function forceDeleteUser($idOrCriteria)
+    {
+        if (! is_array($idOrCriteria)) {
+            $idOrCriteria = [$idOrCriteria];
+        }
+
+        $criteria = ['whereIn' => Repository::wrapVlue('id', $idOrCriteria)];
+
+        return $this->forceDelete($criteria);
     }
 }

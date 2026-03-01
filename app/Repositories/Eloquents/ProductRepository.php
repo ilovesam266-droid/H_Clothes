@@ -17,13 +17,13 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     {
         return $this->all(
             criteria: function ($query) use ($request) {
-                $query->with('variants', function ($q) {
+                $query->with(['variants' => function ($q) {
                     $q->select('id', 'product_id', 'stock', 'price', 'sku');
-                });
+                }]);
 
-                $query->with('creator', function ($q) {
+                $query->with(['creator' => function ($q) {
                     $q->select('id', 'first_name', 'last_name', 'email');
-                });
+                }]);
 
                 $query->with(['images' => function ($q) {
                     $q->select('images.id', 'images.url')->withPivot('position');
@@ -36,25 +36,39 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
                 $query->when(
                     $request->trashed ?? null,
                     function ($q, $trashed) {
-                        match ($trashed) {
+                        return match ($trashed) {
                             'only' => $q->onlyTrashed(),
                             'with' => $q->withTrashed(),
-                            'active' => null,
+                            default => $q,
                         };
                     }
                 );
 
-                $query->when(
-                    isset($request->search),
-                    function ($innerQuery) use ($request) {
-                        $innerQuery->where(function ($subQuery) use ($request) {
-                            $subQuery->where('name', 'like', '%' . $request->search . '%')
-                                ->orWhere('slug', 'like', '%' . $request->search . '%');
-                        })->when(isset($request->filters['status']), function ($innerQuery) use ($request) {
-                            $innerQuery->where('status', '=', $request->filters['status']);
-                        });
-                    }
-                );
+                $query->when($request->search, function ($q, $search) {
+                    $q->where(function ($sub) use ($search) {
+                        $sub->where('name', 'like', "%{$search}%")
+                            ->orWhere('slug', 'like', "%{$search}%");
+                    });
+                });
+
+                $query->when($request->filters['status'] ?? null, function ($q, $status) {
+                    $q->where('status', $status);
+                });
+
+                $query->when($request->filters['creator'] ?? null, function ($q, $creatorId) {
+                    $q->where('created_by', $creatorId);
+                });
+
+                $query->when($request->filters['stock'] ?? null, function ($q, $stockType) {
+                    $q->whereHas('variants', function ($inner) use ($stockType) {
+                        match ($stockType) {
+                            'in_stock' => $inner->where('stock', '>', 10),
+                            'low_stock' => $inner->whereBetween('stock', [1, 10]),
+                            'out_of_stock' => $inner->where('stock', '<=', 0),
+                            default => null
+                        };
+                    });
+                });
             },
             perPage: $request->perPage ?? 20,
             columns: ['*'],
@@ -64,7 +78,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 
     public function deleteProduct($idOrCriteria)
     {
-        if (!is_array($idOrCriteria)) {
+        if (! is_array($idOrCriteria)) {
             $idOrCriteria = [$idOrCriteria];
         }
 
@@ -78,5 +92,12 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
         $criteria = ['whereIn' => Repository::wrapVlue('id', $idOrCriteria)];
 
         return $this->restore($criteria);
+    }
+
+    public function forceDeleteProduct($idOrCriteria)
+    {
+        $criteria = ['whereIn' => Repository::wrapVlue('id', $idOrCriteria)];
+
+        return $this->forceDelete($criteria);
     }
 }

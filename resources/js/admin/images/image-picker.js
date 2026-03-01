@@ -94,7 +94,10 @@ const ImagePicker = {
 
         try {
             const res = await fetch(url, {
-                headers: { 'Accept': 'application/json' }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                }
             });
 
             const data = await res.json();
@@ -179,7 +182,6 @@ const ImagePicker = {
     },
 
     confirmSelection() {
-
         if (!this.state.selected.size) {
             alert('Pls select image');
             return;

@@ -86,6 +86,7 @@ const UserCreate = {
                 body: formData,
                 headers: {
                     'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                 }
             });
 

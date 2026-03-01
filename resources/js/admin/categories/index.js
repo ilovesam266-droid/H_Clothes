@@ -79,7 +79,12 @@ const CategoryPage = {
     async fetchCategories() {
         this.state.loading = true;
 
+        const token = localStorage.getItem('auth_token');
+
         const res = await axios.get('/api/admin/categories', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             params: {
                 trashed: this.state.currentTab,
                 search: this.state.search,

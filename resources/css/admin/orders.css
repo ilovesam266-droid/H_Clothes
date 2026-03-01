@@ -1,0 +1,91 @@
+/* Reuse product listing styles */
+.order-id {
+    font-weight: 600;
+    color: #696cff;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: #495057;
+}
+
+.customer-email {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.order-amount {
+    font-weight: 600;
+    color: #198754;
+}
+
+/* Status specific colors if needed beyond standard Bootstrap */
+.badge-pending {
+    background-color: #ffab00;
+}
+
+.badge-confirmed {
+    background-color: #03c3ec;
+}
+
+.badge-shipping {
+    background-color: #696cff;
+}
+
+.badge-delivering {
+    background-color: #8592a3;
+}
+
+.badge-completed {
+    background-color: #71dd37;
+}
+
+.badge-cancelled {
+    background-color: #ff3e1d;
+}
+
+.badge-failed {
+    background-color: #233446;
+}
+
+/* Sidebar Detail Styles */
+.order-sidebar-items {
+    margin-top: 20px;
+}
+
+.order-item-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f2f4;
+}
+
+.order-item-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-item-name {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.order-item-meta {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.order-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e9ecef;
+}

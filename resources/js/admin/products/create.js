@@ -6,7 +6,7 @@ import CategoryPicker from "../categories/category-picker.js";
 const ProductCreate = {
 
     state: {
-        images: [],
+        selectedImages: [],
         dragIndex: null,
     },
 
@@ -43,14 +43,14 @@ const ProductCreate = {
         imagePicker.open({
             multiple: true,
 
-            selectedIds: this.state.images
+            selectedIds: this.state.selectedImages
                 .filter(img => img.id)
                 .map(img => img.id),
 
             onConfirm: (images) => {
 
                 images.forEach(img => {
-                    this.state.images.push({
+                    this.state.selectedImages.push({
                         id: img.id,
                         preview: img.url,
                         file: null,
@@ -63,11 +63,10 @@ const ProductCreate = {
     },
 
     renderImages() {
-
         const container = document.getElementById('imagePreview');
         if (!container) return;
 
-        container.innerHTML = this.state.images.map((img, index) => `
+        container.innerHTML = this.state.selectedImages.map((img, index) => `
             <div class="preview-item"
                  draggable="true"
                  data-index="${index}"
@@ -105,20 +104,74 @@ const ProductCreate = {
 
         if (dragIndex === null || dragIndex === targetIndex) return;
 
-        const images = [...this.state.images];
+        const images = [...this.state.selectedImages];
 
         [images[dragIndex], images[targetIndex]] =
             [images[targetIndex], images[dragIndex]];
 
-        this.state.images = images;
+        this.state.selectedImages = images;
         this.state.dragIndex = null;
 
         this.renderImages();
     },
 
     removeImage(index) {
-        this.state.images.splice(index, 1);
+        this.state.selectedImages.splice(index, 1);
         this.renderImages();
+    },
+
+    collectDetails() {
+        const details = {};
+        const rows = document.querySelectorAll('#detailFields .detail-field');
+
+        rows.forEach(row => {
+            const key = row.querySelector('.detail-key').value.trim();
+            const value = row.querySelector('.detail-value').value.trim();
+
+            if (key !== '') {
+                details[key] = value;
+            }
+        });
+
+        return details;
+    },
+
+    addDetailField() {
+        const container = document.getElementById('detailFields');
+
+        const newField = document.createElement('div');
+        newField.className = 'detail-field row g-2 mt-2';
+
+        newField.innerHTML = `
+        <div class="col-md-5">
+            <input type="text" placeholder="Name (vd: Color, size...)" 
+                   class="form-control detail-key">
+        </div>
+        <div class="col-md-5">
+            <input type="text" placeholder="Value" 
+                   class="form-control detail-value">
+        </div>
+        <div class="col-md-2">
+            <button type="button" onclick="productCreateApp.removeDetailField(this)" 
+                    class="btn btn-danger w-100">
+                <i class="bx bx-trash"></i>
+            </button>
+        </div>
+    `;
+
+        container.appendChild(newField);
+    },
+
+    removeDetailField(button) {
+        const field = button.closest('.detail-field');
+
+        const allFields = document.querySelectorAll('#detailFields .detail-field');
+        if (allFields.length === 1) {
+            alert('Phải có ít nhất 1 detail!');
+            return;
+        }
+
+        field.remove();
     },
 
     bindForm() {
@@ -136,11 +189,16 @@ const ProductCreate = {
         const form = document.getElementById('productForm');
         const formData = new FormData(form);
 
-        this.state.images.forEach((img, index) => {
+        this.state.selectedImages.forEach((img, index) => {
             if (img.id) {
                 formData.append(`images[${index}]`, img.id);
             }
         });
+
+        const details = this.collectDetails();
+        formData.append('detail', JSON.stringify(details));
+
+        console.log('FORM DATA', formData);
 
         try {
             const res = await fetch('/api/admin/products/create', {
@@ -154,11 +212,32 @@ const ProductCreate = {
 
             const data = await res.json();
 
-            // Validation error (Laravel 422)
+            const alertBox = document.getElementById('formErrorAlert');
+            alertBox.classList.add('d-none');
+            alertBox.innerHTML = '';
+
             if (res.status === 422 && data.errors) {
+
+                // Clear old errors
+                document.querySelectorAll('.is-invalid').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+
+                document.querySelectorAll('.invalid-feedback').forEach(el => {
+                    el.remove();
+                });
+
                 Object.entries(data.errors).forEach(([field, messages]) => {
-                    const input = document.querySelector(`[name="${field}"]`);
-                    if (!input) return;
+
+                    // Xử lý array field (category_ids.0 → category_ids)
+                    const cleanField = field.replace(/\.\d+/g, '');
+
+                    const input = document.querySelector(`[name="${cleanField}"]`);
+
+                    if (!input) {
+                        console.warn('⚠ Field not found in DOM:', field);
+                        return; // QUAN TRỌNG
+                    }
 
                     input.classList.add('is-invalid');
 
@@ -166,16 +245,11 @@ const ProductCreate = {
                     feedback.className = 'invalid-feedback';
                     feedback.innerText = messages[0];
 
-                    input.parentNode.appendChild(feedback);
+                    input.parentNode?.appendChild(feedback);
                 });
-                return;
+
+                return window.location.href = productIndexRoute;
             }
-
-            if (!res.ok) {
-                throw new Error(data.message || 'Request failed');
-            }
-
-
             console.log('SUCCESS', data);
 
         } catch (e) {

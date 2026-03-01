@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\User\Resource;
-use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 
@@ -79,6 +78,7 @@ class UserController extends Controller
     public function delete(int $id, Request $request, UserService $userService)
     {
         $user = $userService->deleteUser($id);
+
         return response()->json([
             'message' => 'Deleted succesfully',
             'data' => $user,
@@ -94,6 +94,18 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Restored succesfully',
             'restored_count' => $users,
+        ]);
+    }
+
+    public function forceDelete(Request $request, UserService $userService)
+    {
+        $ids = $request->all();
+
+        $users = $userService->forceDeleteUser($ids);
+
+        return response()->json([
+            'message' => 'Permanently deleted succesfully',
+            'deleted_count' => $users,
         ]);
     }
 }

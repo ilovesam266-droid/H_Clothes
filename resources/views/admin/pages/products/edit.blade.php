@@ -1,12 +1,12 @@
 @extends('admin.layouts.layout-page')
 
-@vite(['resources/js/admin/products/create.js', 'resources/js/admin/images/image-picker.js', 'resources/css/admin/products.css'])
+@vite(['resources/js/admin/products/edit.js', 'resources/js/admin/images/image-picker.js', 'resources/css/admin/products.css'])
 
 @section('content')
     <div class="form-container">
         <div class="form-header">
-            <h2><i class="bi bi-plus-circle"></i> Create New Product</h2>
-            <p>Fill in the information below to create a new product</p>
+            <h2><i class="bi bi-pencil-square"></i> Edit Product</h2>
+            <p>Update the information below to edit the product</p>
         </div>
 
         <div id="formErrorAlert" class="alert alert-danger d-none"></div>
@@ -17,12 +17,9 @@
                     Product Name <span class="text-danger">*</span>
                 </label>
                 <input type="text" id="name" name="name" maxlength="125" required
-                    class="form-control form-control-lg @error('name') is-invalid @enderror"
+                    class="form-control form-control-lg"
                     placeholder="Enter Product Name...">
                 <div class="form-text">Slug is automatically created</div>
-                @error('name')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
             </div>
 
             <!-- Trạng thái -->
@@ -30,14 +27,11 @@
                 <label for="status" class="form-label fw-semibold">
                     Status
                 </label>
-                <select id="status" name="status" class="form-select @error('status') is-invalid @enderror">
+                <select id="status" name="status" class="form-select">
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                     <option value="2">Draft</option>
                 </select>
-                @error('status')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
             </div>
 
             <!-- Mô tả -->
@@ -46,10 +40,7 @@
                     Description <span class="text-danger">*</span>
                 </label>
                 <textarea id="description" name="description" rows="5" required
-                    class="form-control @error('description') is-invalid @enderror" placeholder="Enter description"></textarea>
-                @error('description')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                    class="form-control" placeholder="Enter description"></textarea>
             </div>
 
             <!-- Danh mục -->
@@ -60,8 +51,6 @@
                 <div id="categoriesContainer" class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
                     <!-- Categories will be loaded here -->
                 </div>
-                <!-- <input type="hidden" name="categories[]" id="categoryIds"> -->
-                <div id="categoryIds"></div>
             </div>
 
             <!-- Hình ảnh -->
@@ -71,39 +60,25 @@
                 </label>
 
                 <div class="drop-zone" id="imageDropZone">
-                    {{--
-                    <!-- QUAN TRỌNG: id phải khớp bindFileInput -->
-                    <input type="file" id="imageUpload" accept="image/*" multiple class="d-none"> --}}
-
                     <i class="bx bx-cloud-upload fs-1 text-primary"></i>
 
                     <div class="mt-3 d-flex justify-content-center gap-2">
-
-                        {{-- <!-- Trigger file input -->
-                        <button type="button" class="btn btn-primary"
-                            onclick="document.getElementById('imageUpload').click()">
-                            <i class="bx bx-upload me-2"></i>
-                            Upload Images
-                        </button> --}}
-
                         <!-- Mở ImagePicker -->
                         <button type="button" class="btn btn-outline-secondary"
-                            onclick="productCreateApp.openImagePicker()">
+                            onclick="productEditApp.openImagePicker()">
                             <i class="bx bx-images me-2"></i>
                             Image Library
                         </button>
-
                     </div>
 
                     <p class="text-muted mt-2 mb-0">
-                        Or drag & drop images here
+                        Or drag &amp; drop images here
                     </p>
                 </div>
 
                 <!-- QUAN TRỌNG: renderImages dùng id này -->
                 <div id="imagePreview" class="mt-3 d-flex flex-wrap"></div>
             </div>
-
 
             <!-- Chi tiết (JSON) -->
             <div class="mb-4">
@@ -119,13 +94,13 @@
                             <input type="text" placeholder="Value" class="form-control detail-value">
                         </div>
                         <div class="col-md-2">
-                            <button type="button" onclick="productCreateApp.removeDetailField(this)" class="btn btn-danger w-100">
+                            <button type="button" onclick="productEditApp.removeDetailField(this)" class="btn btn-danger w-100">
                                 <i class="bx bx-trash"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-                <button type="button" onclick="productCreateApp.addDetailField()" class="btn btn-success mt-2">
+                <button type="button" onclick="productEditApp.addDetailField()" class="btn btn-success mt-2">
                     <i class="bx bx-plus-lg me-2"></i>Add Field
                 </button>
             </div>
@@ -136,10 +111,11 @@
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </a>
                 <button type="submit" class="btn btn-primary px-5">
-                    <i class="bi bi-check-circle me-2"></i>Create product
+                    <i class="bi bi-check-circle me-2"></i>Save Changes
                 </button>
             </div>
         </form>
+
         <x-modal id="imagePickerModal" nameModal="Select Image" nameBtn="Confirm" pageManager="imagePicker"
             event="confirmSelection()" color="primary" class="modal-xl">
             <div id="imagePickerGrid" class="image-picker-grid"></div>
@@ -150,6 +126,7 @@
                 </button>
             </div>
         </x-modal>
+
         <x-modal id="uploadImageModal" nameModal="Upload Images" nameBtn="Upload All" pageManager="imagePageApp"
             event="confirmUploadImages()" color="primary">
             <form id="uploadImageForm" enctype="multipart/form-data">
@@ -167,7 +144,8 @@
                 </div>
             </form>
         </x-modal>
-        <x-modal id="categoryModal" nameModal="Select Categories" nameBtn="Done" pageManager="productCreateApp"
+
+        <x-modal id="categoryModal" nameModal="Select Categories" nameBtn="Done" pageManager="productEditApp"
             event="confirmSelectCategories()" color="primary">
 
             <div class="mb-3">
@@ -183,13 +161,17 @@
             </div>
 
             <div class="d-flex justify-content-between">
-                <button type="button" class="btn btn-light btn-sm" onclick="productCreateApp.clearSelection()">
+                <button type="button" class="btn btn-light btn-sm" onclick="productEditApp.clearSelection()">
                     Clear
                 </button>
             </div>
+
+            <input type="hidden" name="category_ids[]" id="categoryIds">
+
         </x-modal>
     </div>
     <script>
         const productIndexRoute = "{{ route('admin.products') }}";
+        const productId = {{ $productId }};
     </script>
 @endsection

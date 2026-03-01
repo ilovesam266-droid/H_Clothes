@@ -140,7 +140,12 @@ export const ImagePage = {
     async fetchImages() {
         this.state.loading = true;
 
+        const token = localStorage.getItem('auth_token');
+
         const res = await axios.get('/api/admin/images', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             params: {
                 trashed: this.state.currentTab,
                 search: this.state.search,
@@ -769,7 +774,7 @@ export const ImagePage = {
     },
 
     renderPagination() {
-        if(!this.dom.pagination){
+        if (!this.dom.pagination) {
             console.debug("No #imageTable found, skip rendering");
             return;
         }

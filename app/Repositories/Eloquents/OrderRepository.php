@@ -8,6 +8,8 @@ use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderItem;
 use App\Repositories\Constracts\OrderRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 
 class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 {
@@ -52,5 +54,41 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
         $addressData['order_id'] = $orderId;
 
         OrderAddress::create($addressData);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getAllOrders(Request $request): LengthAwarePaginator
+    {
+        $query = Order::query()->with(['user', 'address', 'items']);
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($u) => $u->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->filled('status') && $request->input('status') !== '') {
+            $query->where('status', (int) $request->input('status'));
+        }
+
+        $query->latest();
+
+        return $query->paginate((int) $request->input('perPage', 15));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateOrderStatus(int $id, array $data): Order
+    {
+        /** @var Order */
+        $order = Order::findOrFail($id);
+        $order->update($data);
+
+        return $order->fresh(['user', 'items', 'address']);
     }
 }

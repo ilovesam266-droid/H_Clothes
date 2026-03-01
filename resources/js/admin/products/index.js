@@ -75,7 +75,12 @@ const ProductPage = {
     async fetchProducts() {
         this.state.loading = true;
 
+        const token = localStorage.getItem('auth_token');
+
         const response = await window.axios.get('/api/admin/products', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             params: {
                 trashed: this.state.currentTab,
                 search: this.state.search,
@@ -122,7 +127,7 @@ const ProductPage = {
                 <td>${(this.state.currentPage - 1) * this.state.perPage + index + 1}</td>
                 <td>
                     <div class="d-flex align-items-center">
-                        <img src="${product.images?.length ? '/' + product.images[0].url : '/images/placeholder.png'}"
+                        <img src="${product.images?.length ? '/' + product.images[0].url : '/storage/images/place-holder.jpg'}"
                             class="product-thumb me-2"
                             alt="${product.name}">
 
@@ -174,11 +179,11 @@ const ProductPage = {
                                 <i class='bx bx-scan'></i>
                             </button>
 
-                            <button class="btn btn-warning"
-                                    onclick="productPageApp.editProduct(${product.id})"
+                            <a class="btn btn-warning"
+                                    href="${window.routes.productEdit + '/' + product.id + '/edit'}"
                                     title="Edit">
                                 <i class="bx bx-edit"></i>
-                            </button>
+                            </a>
                             <button class="btn btn-danger"
                                     onclick="productPageApp.deleteProduct(${product.id})"
                                     title="Delete">
@@ -188,12 +193,12 @@ const ProductPage = {
                             <button class="btn btn-success"
                                     onclick="productPageApp.restoreProduct(${product.id})"
                                     title="Restore">
-                                <i class="bi bi-arrow-counterclockwise"></i>
+                                <i class="bx bx-undo"></i>
                             </button>
                             <button class="btn btn-danger"
                                     onclick="productPageApp.forceDeleteProduct(${product.id})"
                                     title="Delete Permanently">
-                                <i class="bi bi-trash-fill"></i>
+                                <i class="bx bx-trash"></i>
                             </button>
                         `}
                     </div>
@@ -412,6 +417,7 @@ const ProductPage = {
 
                     // cập nhật query string
                     this.setQuery('ProductDashboard', page);
+                    this.state.currentPage = page;
 
                     // fetch lại data
                     this.fetchProducts();
@@ -431,6 +437,131 @@ const ProductPage = {
         const params = new URLSearchParams(location.search);
         value ? params.set(key, value) : params.delete(key);
         history.replaceState(null, '', '?' + params.toString());
+    },
+
+    async viewProduct(id) {
+        if (!id) return;
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await window.axios.get(`/api/admin/products/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            const product = response.data.data;
+            this.renderSidebar(product);
+        } catch (error) {
+            console.error('Error fetching product details:', error);
+            this.showToast('Failed to load product details', 'error');
+        }
+    },
+
+    renderSidebar(product) {
+        const sidebar = document.getElementById('productSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const content = document.getElementById('sidebarContent');
+
+        if (!sidebar || !overlay || !content) return;
+
+        content.innerHTML = `
+            <div class="product-detail">
+                <div class="text-center mb-4">
+                    <img src="${product.images?.length ? '/' + product.images[0].url : '/storage/images/place-holder.jpg'}"
+                         class="img-fluid rounded border shadow-sm"
+                         style="max-height: 200px; width: auto;"
+                         alt="${product.name}">
+                </div>
+
+                <div class="detail-item">
+                    <label>Product Name</label>
+                    <p class="fw-bold fs-5">${product.name}</p>
+                </div>
+
+                <div class="detail-item">
+                    <label>Slug</label>
+                    <p class="text-muted">${product.slug}</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <div class="detail-item">
+                            <label>Status</label>
+                            <div>
+                                <span class="badge bg-${product.status ? 'success' : 'secondary'}">
+                                    ${product.status ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="detail-item">
+                            <label>Created By</label>
+                            <p>${product.creator?.name || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <label>Price Range</label>
+                    <p class="text-success fw-bold">${product.min_price} - ${product.max_price}</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        <div class="detail-item">
+                            <label>SKUs</label>
+                            <p>${product.total_variants || 0}</p>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="detail-item">
+                            <label>Stock</label>
+                            <p>${product.total_stock || 0}</p>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="detail-item">
+                            <label>Sold</label>
+                            <p>${product.total_sold || 0}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <label>Description</label>
+                    <div class="p-2 bg-light rounded" style="font-size: 13px;">
+                        ${product.description || '<span class="text-muted">No description available</span>'}
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <label>Created At</label>
+                    <p>${product.created_at?.date} ${product.created_at?.time}</p>
+                </div>
+
+                ${product.categories?.length ? `
+                    <div class="detail-item">
+                        <label>Categories</label>
+                        <div class="d-flex flex-wrap gap-1">
+                            ${product.categories.map(cat => `<span class="badge bg-primary">${cat.name}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+    },
+
+    closeSidebar() {
+        const sidebar = document.getElementById('productSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        sidebar?.classList.remove('show');
+        overlay?.classList.remove('show');
     },
 
     debounce(fn, delay) {

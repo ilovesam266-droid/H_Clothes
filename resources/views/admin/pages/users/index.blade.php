@@ -5,110 +5,68 @@
 @section('content')
     <div class="container-fluid" id="admin-user-page">
         <div class="d-flex justify-content-between mb-2">
-            <div class="tabs-section">
-                <ul class="nav nav-tabs nav-tabs-custom">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="userPageApp.switchTab('active', this)">
-                            Active Users <span class="badge-count" id="activeCount">0</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="userPageApp.switchTab('only', this)">
-                            <i class="bi bi-trash"></i> Deleted Users <span class="badge-count" id="deletedCount">0</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <x-tabs-section>
+                <x-tabs-section.item nameTab='Active Users' pageManager="userPageApp"
+                    event="switchTab('active', this)" spanId="activeCount" :isActive=true></x-tabs-section.item>
+                <x-tabs-section.item nameTab="Deleted Users" pageManager="userPageApp" event="switchTab('only', this)"
+                    spanId="deletedCount"></x-tabs-section.item>
+            </x-tabs-section>
             <a class="btn btn-add text-white" href="{{ route('admin.user-create') }}">
                 <i class="bx bx-plus-circle"></i> Add New User
             </a>
         </div>
 
         <div class="card">
-            <div class="card-body flex gap-2">
-                <div class="search-box">
-                    <i class="bx bx-search"></i>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, email...">
-                </div>
-            </div>
-            <div class="card-body flex gap-2" style="
-    padding-top: 0px;
-">
-                <div class="row g-4">
-                    <div class="col-md-3">
-                        <select class="form-select" id="statusFilter">
-                            <option value="">All Status</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="roleFilter">
-                            <option value="">All Roles</option>
-                            <option value="0">Admin</option>
-                            <option value="1">User</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="verifiedFilter">
-                            <option value="">All</option>
-                            <option value="1">Verified</option>
-                            <option value="0">Not Verified</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="perPage">
-                            <option value="10">10 / page</option>
-                            <option value="25">25 / page</option>
-                            <option value="50">50 / page</option>
-                            <option value="100">100 / page</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <x-search-box placeholder="Search by name, email..." />
+
+            <x-filters>
+                <x-filters-box.filter-box-select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </x-filters-box.filter-box-select>
+
+                <x-filters-box.filter-box-select id="roleFilter">
+                    <option value="">All Roles</option>
+                    <option value="0">Admin</option>
+                    <option value="1">User</option>
+                </x-filters-box.filter-box-select>
+
+                <x-filters-box.filter-box-select id="verifiedFilter">
+                    <option value="">All</option>
+                    <option value="1">Verified</option>
+                    <option value="0">Not Verified</option>
+                </x-filters-box.filter-box-select>
+
+                <x-filters-box.filter-box-select id="perPage">
+                    <option value="10">10 / page</option>
+                    <option value="25">25 / page</option>
+                    <option value="50">50 / page</option>
+                    <option value="100">100 / page</option>
+                </x-filters-box.filter-box-select>
+            </x-filters>
+
             <div class="card-body p-0">
-                <div class="bulk-actions" id="bulkActionsBar">
-                    <div>
-                        <span class="selected-count">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span id="selectedCount">0</span> Users selected
-                        </span>
-                    </div>
-                    <div>
-                        <button class="btn btn-danger btn-bulk" onclick="userPageApp.openBulkDeleteModal()"
-                            id="bulkDeleteBtn">
-                            <i class="bi bi-trash"></i> Delete Selected
-                        </button>
-                        <button class="btn btn-success btn-bulk" onclick="userPageApp.openBulkRestoreModal()"
-                            id="bulkRestoreBtn">
-                            <i class="bi bi-arrow-counterclockwise"></i> Restore Selected
-                        </button>
-                        <button class="btn btn-secondary btn-bulk" onclick="userPageApp.clearSelection()">
-                            <i class="bi bi-x-circle"></i> Clear Selection
-                        </button>
-                    </div>
-                </div>
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th width="50">
-                                <input type="checkbox" class="checkbox-custom" id="selectAll"
-                                    onchange="userPageApp.toggleSelectAll()">
-                            </th>
-                            <th>#</th>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Updated</th>
-                            <th width="150" class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <!-- JS render -->
-                    </tbody>
-                </table>
+                <x-bulk-actions name="Users selected">
+                    <x-button-action btnName="Delete Selected" id="bulkDeleteBtn" pageManager="userPageApp"
+                        event="openBulkDeleteModal()" color="danger" icon="bx bx-trash" />
+                    <x-button-action btnName="Restore Selected" id="bulkRestoreBtn" pageManager="userPageApp"
+                        event="openBulkRestoreModal()" color="success" icon="bx bx-undo" />
+                    <x-button-action btnName="Clear Selection" pageManager="userPageApp" event="clearSelection()"
+                        color="secondary" />
+                </x-bulk-actions>
+
+                <x-table id="userTableBody" pageManager="userPageApp">
+                    <th>#</th>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Updated</th>
+                    <th width="150" class="text-center">Actions</th>
+                </x-table>
+
                 <nav>
                     <ul id="pagination" class="pagination justify-content-end"></ul>
                 </nav>
@@ -116,123 +74,68 @@
         </div>
         <div class="mt-3" id="pagination"></div>
     </div>
-    <div class="modal fade" id="confirmBulkDeleteModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Confirm Bulk Delete
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+    <!-- Bulk Delete Modal -->
+    <x-modal id="confirmBulkDeleteModal" nameModal="Confirm Bulk Delete" pageManager="userPageApp"
+        event="confirmBulkDelete()" color="danger" nameBtn="Delete">
+        <p>
+            Are you sure you want to delete
+            <strong id="bulkDeleteCount"></strong> users?
+        </p>
+        <p class="text-muted mb-0">
+            This action can be restored later.
+        </p>
+    </x-modal>
 
-                <div class="modal-body">
-                    <p>
-                        Are you sure you want to delete
-                        <strong id="bulkDeleteCount"></strong> users?
-                    </p>
-                    <p class="text-muted mb-0">
-                        This action can be restored later.
-                    </p>
-                </div>
+    <!-- Bulk Restore Modal -->
+    <x-modal id="confirmBulkRestoreModal" nameModal="Confirm Bulk Restore" pageManager="userPageApp"
+        event="confirmBulkRestore()" color="success" nameBtn="Restore">
+        <p>
+            Are you sure you want to restore
+            <strong id="bulkRestoreCount"></strong> users?
+        </p>
+        <p class="text-muted mb-0">
+            This action will make the users active again.
+        </p>
+    </x-modal>
 
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-danger" onclick="userPageApp.confirmBulkDelete()">
-                        Delete
-                    </button>
-                </div>
+    <!-- Single Delete Modal -->
+    <x-modal id="confirmDeleteModal" nameModal="Confirm Delete" pageManager="userPageApp" event="confirmDelete()"
+        color="danger" nameBtn="Delete">
+        <p>
+            Are you sure you want to delete this user?
+        </p>
+        <p class="text-muted mb-0">
+            This action can be restored later.
+        </p>
+    </x-modal>
 
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="confirmBulkRestoreModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+    <!-- Single Restore Modal -->
+    <x-modal id="confirmRestoreModal" nameModal="Confirm Restore" pageManager="userPageApp" event="confirmRestore()"
+        color="success" nameBtn="Restore">
+        <p>
+            Are you sure you want to restore this user?
+        </p>
+        <p class="text-muted mb-0">
+            This action will make the user active again.
+        </p>
+    </x-modal>
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Confirm Bulk Restore
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+    <!-- Force Delete Modal -->
+    <x-modal id="confirmForceDeleteModal" nameModal="Confirm Permanent Delete" pageManager="userPageApp"
+        event="confirmForceDelete()" color="danger" nameBtn="Delete Permanently">
+        <p>
+            Are you sure you want to permanently delete this user?
+        </p>
+        <p class="text-warning mb-0">
+            <i class="bi bi-exclamation-triangle"></i> This action cannot be undone!
+        </p>
+    </x-modal>
 
-                <div class="modal-body">
-                    <p>
-                        Are you sure you want to restore
-                        <strong id="bulkRestoreCount"></strong> users?
-                    </p>
-                    <p class="text-muted mb-0">
-                        This action can be restored later.
-                    </p>
-                </div>
+    <!-- Sidebar -->
+    <x-sidebar-item.sidebar-overlay pageManager="userPageApp" event="closeSidebar()" />
+    <x-sidebar id="userSidebar" nameSidebar="User Details" pageManager="userPageApp" event="closeSidebar()" />
 
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-success" onclick="userPageApp.confirmBulkRestore()">
-                        Restore
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="confirmDeleteModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Confirm Delete
-                    </h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p>
-                        Are you sure you want to delete
-                        <strong id="bulkRestoreCount"></strong> users?
-                    </p>
-                    <p class="text-muted mb-0">
-                        This action can be deleted later.
-                    </p>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-success" onclick="userPageApp.confirmDelete()">
-                        Delete
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="userPageApp.closeSidebar()"></div>
-    <div class="user-sidebar" id="userSidebar">
-        <div class="sidebar-header">
-            <h3 class="text-white"><i class="bx bx-user-circle"></i> User Details</h3>
-            <button class="btn-close-sidebar" onclick="userPageApp.closeSidebar()">
-                <i class="bx bx-menu"></i>
-            </button>
-        </div>
-        <div class="sidebar-body" id="sidebarContent">
-            <!-- Content will be loaded here -->
-        </div>
-        <div class="sidebar-actions" id="sidebarActions">
-            <!-- Actions will be loaded here -->
-        </div>
-    </div>
     <script>
         window.routes = {
             userEdit: "{{ url('/admin/users') }}"

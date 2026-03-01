@@ -90,9 +90,16 @@
         </li>
 
         <li class="menu-item">
-            <a href="{{ route('admin.users') }}" class="menu-link">
+            <a href="{{ route('admin.categories') }}" class="menu-link">
                 <i class="bx bx-user"></i>
-                <div data-i18n="Layouts">User</div>
+                <div data-i18n="Layouts">Category</div>
+            </a>
+        </li>
+
+        <li class="menu-item">
+            <a href="{{ route('admin.orders') }}" class="menu-link">
+                <i class="bx bx-user"></i>
+                <div data-i18n="Layouts">Order</div>
             </a>
         </li>
 

@@ -20,7 +20,12 @@ const editUserApp = {
     },
 
     async fetchUser() {
-        const res = await fetch(`/api/admin/users/${this.userId}`);
+        const res = await fetch(`/api/admin/users/${this.userId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+        });
         this.state.user = await res.json();
 
         this.fillForm(this.state.user.data);
